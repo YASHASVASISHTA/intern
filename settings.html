@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings - FoodieHive</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -603,6 +607,30 @@
             font-size: 12px;
             font-weight: 600;
         }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            display: none;
+        }
+
+        .toast.success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            display: block;
+        }
+
+        .toast.error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -681,7 +709,7 @@
                             Settings
                         </a>
                         <hr>
-                        <a href="index.html">
+                        <a href="#" onclick="logout()">
                             <i class="fas fa-sign-out-alt"></i>
                             Logout
                         </a>
@@ -733,6 +761,9 @@
                 <p>Manage your account and preferences</p>
             </div>
 
+            <!-- Toast Notification -->
+            <div id="toast" class="toast"></div>
+
             <!-- Settings Content -->
             <div class="settings-content">
                 <!-- Profile Settings -->
@@ -741,28 +772,28 @@
                         <i class="fas fa-user"></i>
                         Profile Information
                     </h2>
-                    <form>
+                    <form id="profileForm">
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="firstName">First Name</label>
-                                <input type="text" id="firstName" value="Alex" required>
+                                <input type="text" id="firstName" required>
                             </div>
                             <div class="form-group">
                                 <label for="lastName">Last Name</label>
-                                <input type="text" id="lastName" value="Johnson" required>
+                                <input type="text" id="lastName" required>
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="username">Username</label>
-                            <input type="text" id="username" value="alexjohnson" required>
+                            <input type="text" id="username" required>
                         </div>
                         <div class="form-group">
                             <label for="email">Email</label>
-                            <input type="email" id="email" value="alex@example.com" required>
+                            <input type="email" id="email" required disabled>
                         </div>
                         <div class="form-group">
                             <label for="bio">Bio</label>
-                            <textarea id="bio" placeholder="Tell us about yourself...">Passionate chef with 10+ years of experience creating innovative dishes that blend traditional techniques with modern flavors.</textarea>
+                            <textarea id="bio" placeholder="Tell us about yourself..."></textarea>
                         </div>
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-save"></i>
@@ -771,133 +802,32 @@
                     </form>
                 </div>
 
-                <!-- Privacy Settings -->
-                <div class="settings-section">
-                    <h2 class="section-title">
-                        <i class="fas fa-shield-alt"></i>
-                        Privacy & Security
-                    </h2>
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h4>Profile Visibility</h4>
-                            <p>Make your profile visible to other users</p>
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h4>Show Email</h4>
-                            <p>Display your email address on your profile</p>
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h4>Recipe Comments</h4>
-                            <p>Allow others to comment on your recipes</p>
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h4>Two-Factor Authentication</h4>
-                            <p>Add an extra layer of security to your account</p>
-                        </div>
-                        <button class="btn btn-outline">Enable 2FA</button>
-                    </div>
-                </div>
-
-                <!-- Notification Settings -->
-                <div class="settings-section">
-                    <h2 class="section-title">
-                        <i class="fas fa-bell"></i>
-                        Notifications
-                    </h2>
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h4>Email Notifications</h4>
-                            <p>Receive notifications via email</p>
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h4>Recipe Likes</h4>
-                            <p>Get notified when someone likes your recipe</p>
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h4>New Followers</h4>
-                            <p>Get notified when someone follows you</p>
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h4>Recipe Comments</h4>
-                            <p>Get notified when someone comments on your recipe</p>
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h4>Weekly Digest</h4>
-                            <p>Receive a weekly summary of your activity</p>
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                </div>
-
                 <!-- Account Settings -->
                 <div class="settings-section">
                     <h2 class="section-title">
                         <i class="fas fa-key"></i>
                         Account Security
                     </h2>
-                    <div class="form-group">
-                        <label for="currentPassword">Current Password</label>
-                        <input type="password" id="currentPassword" placeholder="Enter current password">
-                    </div>
-                    <div class="form-row">
+                    <form id="passwordForm">
                         <div class="form-group">
-                            <label for="newPassword">New Password</label>
-                            <input type="password" id="newPassword" placeholder="Enter new password">
+                            <label for="currentPassword">Current Password</label>
+                            <input type="password" id="currentPassword" placeholder="Enter current password" required>
                         </div>
-                        <div class="form-group">
-                            <label for="confirmPassword">Confirm Password</label>
-                            <input type="password" id="confirmPassword" placeholder="Confirm new password">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="newPassword">New Password</label>
+                                <input type="password" id="newPassword" placeholder="Enter new password" required minlength="6">
+                            </div>
+                            <div class="form-group">
+                                <label for="confirmPassword">Confirm Password</label>
+                                <input type="password" id="confirmPassword" placeholder="Confirm new password" required minlength="6">
+                            </div>
                         </div>
-                    </div>
-                    <button type="button" class="btn btn-primary">
-                        <i class="fas fa-lock"></i>
-                        Update Password
-                    </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-lock"></i>
+                            Update Password
+                        </button>
+                    </form>
                 </div>
 
                 <!-- Danger Zone -->
@@ -911,14 +841,14 @@
                             <h4>Deactivate Account</h4>
                             <p>Temporarily disable your account. You can reactivate it anytime.</p>
                         </div>
-                        <button class="btn btn-outline">Deactivate</button>
+                        <button class="btn btn-outline" onclick="deactivateAccount()">Deactivate</button>
                     </div>
                     <div class="setting-item">
                         <div class="setting-info">
                             <h4>Delete Account</h4>
                             <p>Permanently delete your account and all associated data. This action cannot be undone.</p>
                         </div>
-                        <button class="btn btn-danger">Delete Account</button>
+                        <button class="btn btn-danger" onclick="deleteAccount()">Delete Account</button>
                     </div>
                 </div>
             </div>
@@ -950,6 +880,224 @@
     </nav>
 
     <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyA3RPDDpIbLUdPRkJpHtkqap7VwxxApwgk",
+            authDomain: "foodiehive-a6f18.firebaseapp.com",
+            projectId: "foodiehive-a6f18",
+            storageBucket: "foodiehive-a6f18.appspot.com",
+            messagingSenderId: "1004100513391",
+            appId: "1:1004100513391:web:650ee3533bf8b5e289e79a",
+            measurementId: "G-P071E6HP43"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // DOM elements
+        const profileForm = document.getElementById('profileForm');
+        const passwordForm = document.getElementById('passwordForm');
+        const firstName = document.getElementById('firstName');
+        const lastName = document.getElementById('lastName');
+        const username = document.getElementById('username');
+        const email = document.getElementById('email');
+        const bio = document.getElementById('bio');
+        const currentPassword = document.getElementById('currentPassword');
+        const newPassword = document.getElementById('newPassword');
+        const confirmPassword = document.getElementById('confirmPassword');
+        const toast = document.getElementById('toast');
+
+        // Load user data when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = auth.currentUser;
+            
+            if (user) {
+                // Load email (can't be changed)
+                email.value = user.email;
+                
+                // Load profile data from Firestore
+                db.collection('users').doc(user.uid).get()
+                    .then(doc => {
+                        if (doc.exists) {
+                            const userData = doc.data();
+                            firstName.value = userData.firstName || '';
+                            lastName.value = userData.lastName || '';
+                            username.value = userData.username || '';
+                            bio.value = userData.bio || '';
+                        }
+                    })
+                    .catch(error => {
+                        showToast('Error loading profile data', 'error');
+                        console.error('Error loading profile:', error);
+                    });
+            } else {
+                // User not logged in, redirect to login
+                window.location.href = 'login.html';
+            }
+        });
+
+        // Save profile changes
+        profileForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const user = auth.currentUser;
+            if (!user) {
+                showToast('You must be logged in to update profile', 'error');
+                return;
+            }
+            
+            try {
+                // Update profile in Firestore
+                await db.collection('users').doc(user.uid).update({
+                    firstName: firstName.value.trim(),
+                    lastName: lastName.value.trim(),
+                    username: username.value.trim(),
+                    bio: bio.value.trim(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                showToast('Profile updated successfully!', 'success');
+            } catch (error) {
+                showToast('Error updating profile', 'error');
+                console.error('Error updating profile:', error);
+            }
+        });
+
+        // Change password
+        passwordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const user = auth.currentUser;
+            if (!user) {
+                showToast('You must be logged in to change password', 'error');
+                return;
+            }
+            
+            // Validate passwords match
+            if (newPassword.value !== confirmPassword.value) {
+                showToast('Passwords do not match', 'error');
+                return;
+            }
+            
+            try {
+                // Reauthenticate user
+                const credential = firebase.auth.EmailAuthProvider.credential(
+                    user.email, 
+                    currentPassword.value
+                );
+                
+                await user.reauthenticateWithCredential(credential);
+                
+                // Update password
+                await user.updatePassword(newPassword.value);
+                
+                // Clear form
+                passwordForm.reset();
+                
+                showToast('Password updated successfully!', 'success');
+            } catch (error) {
+                let message = 'Error updating password';
+                
+                switch (error.code) {
+                    case 'auth/wrong-password':
+                        message = 'Current password is incorrect';
+                        break;
+                    case 'auth/weak-password':
+                        message = 'Password should be at least 6 characters';
+                        break;
+                }
+                
+                showToast(message, 'error');
+                console.error('Error updating password:', error);
+            }
+        });
+
+        // Deactivate account
+        async function deactivateAccount() {
+            if (!confirm('Are you sure you want to deactivate your account? You can reactivate by logging in again.')) {
+                return;
+            }
+            
+            const user = auth.currentUser;
+            if (!user) {
+                showToast('You must be logged in to deactivate account', 'error');
+                return;
+            }
+            
+            try {
+                // Update user status in Firestore
+                await db.collection('users').doc(user.uid).update({
+                    active: false,
+                    deactivatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                // Sign out user
+                await auth.signOut();
+                
+                showToast('Account deactivated. You can reactivate by logging in again.', 'success');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+            } catch (error) {
+                showToast('Error deactivating account', 'error');
+                console.error('Error deactivating account:', error);
+            }
+        }
+
+        // Delete account
+        async function deleteAccount() {
+            if (!confirm('WARNING: This will permanently delete your account and all data. Are you sure?')) {
+                return;
+            }
+            
+            const user = auth.currentUser;
+            if (!user) {
+                showToast('You must be logged in to delete account', 'error');
+                return;
+            }
+            
+            try {
+                // First delete user data from Firestore
+                await db.collection('users').doc(user.uid).delete();
+                
+                // Then delete the auth account
+                await user.delete();
+                
+                showToast('Account deleted successfully', 'success');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+            } catch (error) {
+                showToast('Error deleting account', 'error');
+                console.error('Error deleting account:', error);
+            }
+        }
+
+        // Logout function
+        async function logout() {
+            try {
+                await auth.signOut();
+                window.location.href = 'login.html';
+            } catch (error) {
+                showToast('Error signing out', 'error');
+                console.error('Error signing out:', error);
+            }
+        }
+
+        // Show toast notification
+        function showToast(message, type) {
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            
+            // Hide after 3 seconds
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        // UI helpers
         function toggleMobileMenu() {
             const mobileMenu = document.getElementById("mobileMenu");
             mobileMenu.classList.toggle("show");
