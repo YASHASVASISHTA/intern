@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - FoodieHive</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: #1a202c;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .auth-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .auth-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 40px 30px;
+        }
+
+        .auth-header h2 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .auth-content {
+            padding: 40px 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .password-input {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #667eea;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .auth-divider {
+            position: relative;
+            text-align: center;
+            margin: 30px 0;
+            color: #64748b;
+        }
+
+        .auth-divider::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e2e8f0;
+            z-index: -1;
+        }
+
+        .auth-divider span {
+            background: white;
+            padding: 0 20px;
+        }
+
+        .social-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .btn-outline {
+            background: white;
+            border: 2px solid #e2e8f0;
+            color: #374151;
+        }
+
+        .btn-outline:hover {
+            background: #f8fafc;
+            border-color: #667eea;
+        }
+
+        .auth-switch {
+            text-align: center;
+            color: #64748b;
+        }
+
+        .auth-switch a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .error-message {
+            color: #e53e3e;
+            background-color: #fed7d7;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success-message {
+            color: #22543d;
+            background-color: #c6f6d5;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h2>Welcome to FoodieHive</h2>
+                <p>Sign in to continue</p>
+            </div>
+
+            <div class="auth-content">
+                <div id="error-message" class="error-message"></div>
+                <div id="success-message" class="success-message"></div>
+                
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" placeholder="Enter your email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="password-input">
+                            <input type="password" id="password" placeholder="Enter your password" required>
+                            <button type="button" class="password-toggle" onclick="togglePassword()">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="loginBtn">
+                        <span id="btnText">Sign In</span>
+                        <span id="btnSpinner" style="display:none;"><i class="fas fa-spinner fa-spin"></i> Signing in...</span>
+                    </button>
+                </form>
+
+                <div class="auth-divider">
+                    <span>Or continue with</span>
+                </div>
+
+                <div class="social-buttons">
+                    <button class="btn btn-outline" onclick="googleLogin()">
+                        <i class="fab fa-google"></i> Google
+                    </button>
+                    <button class="btn btn-outline" onclick="facebookLogin()">
+                        <i class="fab fa-facebook"></i> Facebook
+                    </button>
+                </div>
+
+                <p class="auth-switch">
+                    Don't have an account? <a href="signup.html" onclick="showSignUp()">Sign up</a>
+                </p>
+                <p class="auth-switch">
+                    <a href="#" onclick="forgotPassword()">Forgot password?</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword, 
+            signInWithPopup, 
+            GoogleAuthProvider, 
+            FacebookAuthProvider,
+            sendPasswordResetEmail,
+            setPersistence,
+            browserSessionPersistence,
+            browserLocalPersistence
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyA3RPDDpIbLUdPRkJpHtkqap7VwxxApwgk",
+            authDomain: "foodiehive-a6f18.firebaseapp.com",
+            projectId: "foodiehive-a6f18",
+            storageBucket: "foodiehive-a6f18.firebasestorage.app",
+            messagingSenderId: "1004100513391",
+            appId: "1:1004100513391:web:650ee3533bf8b5e289e79a",
+            measurementId: "G-P071E6HP43"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const googleProvider = new GoogleAuthProvider();
+        const facebookProvider = new FacebookAuthProvider();
+
+        // DOM elements
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('loginBtn');
+        const btnText = document.getElementById('btnText');
+        const btnSpinner = document.getElementById('btnSpinner');
+        const errorMessage = document.getElementById('error-message');
+        const successMessage = document.getElementById('success-message');
+
+        // Form submission
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            const rememberMe = true; // You can add a checkbox for this
+            
+            try {
+                // Show loading state
+                btnText.style.display = 'none';
+                btnSpinner.style.display = 'inline';
+                loginBtn.disabled = true;
+                
+                // Set session persistence
+                await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
+                
+                // Sign in user
+                await signInWithEmailAndPassword(auth, email, password);
+                
+                // Redirect on success
+                window.location.href = 'home.html';
+            } catch (error) {
+                // Handle errors
+                handleAuthError(error);
+            } finally {
+                // Reset button state
+                btnText.style.display = 'inline';
+                btnSpinner.style.display = 'none';
+                loginBtn.disabled = false;
+            }
+        });
+
+        // Google login
+        async function googleLogin() {
+            try {
+                await signInWithPopup(auth, googleProvider);
+                window.location.href = 'home.html';
+            } catch (error) {
+                handleAuthError(error);
+            }
+        }
+
+        // Facebook login
+        async function facebookLogin() {
+            try {
+                await signInWithPopup(auth, facebookProvider);
+                window.location.href = 'home.html';
+            } catch (error) {
+                handleAuthError(error);
+            }
+        }
+
+        // Forgot password
+        async function forgotPassword() {
+            const email = emailInput.value;
+            
+            if (!email) {
+                showError('Please enter your email address first');
+                return;
+            }
+            
+            try {
+                await sendPasswordResetEmail(auth, email);
+                showSuccess('Password reset email sent. Check your inbox!');
+            } catch (error) {
+                handleAuthError(error);
+            }
+        }
+
+        // Error handling
+        function handleAuthError(error) {
+            console.error('Authentication error:', error);
+            
+            let message = 'Login failed. Please try again.';
+            switch (error.code) {
+                case 'auth/invalid-email':
+                    message = 'Invalid email address format';
+                    break;
+                case 'auth/user-disabled':
+                    message = 'This account has been disabled';
+                    break;
+                case 'auth/user-not-found':
+                case 'auth/wrong-password':
+                    message = 'Invalid email or password';
+                    break;
+                case 'auth/too-many-requests':
+                    message = 'Too many attempts. Try again later or reset your password';
+                    break;
+                case 'auth/account-exists-with-different-credential':
+                    message = 'An account already exists with this email';
+                    break;
+                case 'auth/popup-closed-by-user':
+                    return; // Don't show error if user closed popup
+            }
+            
+            showError(message);
+        }
+
+        // UI helpers
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+        }
+
+        function togglePassword() {
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+            const icon = document.querySelector('.password-toggle i');
+            icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+        }
+
+        // Placeholder functions
+        function showSignUp() {
+            // Implement your sign up flow
+            alert('Redirect to sign up page');
+        }
+    </script>
+</body>
+</html>

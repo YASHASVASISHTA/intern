@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - FoodieHive</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: #1a202c;
+            background: #f8fafc;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        .app-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .app-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+            gap: 20px;
+        }
+
+        .mobile-menu-btn {
+            display: block;
+            background: none;
+            border: none;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #667eea;
+            transition: background-color 0.3s ease;
+        }
+
+        .mobile-menu-btn:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        @media (min-width: 768px) {
+            .mobile-menu-btn {
+                display: none;
+            }
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover .logo-icon {
+            transform: scale(1.1);
+        }
+
+        .logo-title {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-subtitle {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .desktop-nav {
+            display: none;
+            gap: 8px;
+        }
+
+        @media (min-width: 768px) {
+            .desktop-nav {
+                display: flex;
+            }
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #475569;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .nav-link.active {
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 14px rgba(102, 126, 234, 0.3);
+        }
+
+        .search-bar {
+            display: none;
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+            margin: 0 20px;
+        }
+
+        @media (min-width: 768px) {
+            .search-bar {
+                display: block;
+            }
+        }
+
+        .search-bar i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #667eea;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 12px 16px 12px 48px;
+            background: rgba(102, 126, 234, 0.05);
+            border: 2px solid rgba(102, 126, 234, 0.1);
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            gap: 8px;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(240, 147, 251, 0.3);
+        }
+
+        .profile-dropdown {
+            position: relative;
+        }
+
+        .profile-btn {
+            background: none;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            padding: 4px;
+        }
+
+        .profile-btn:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .profile-btn img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            min-width: 200px;
+            padding: 8px;
+            margin-top: 8px;
+            display: none;
+            z-index: 50;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #374151;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+
+        .dropdown-menu a:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+
+        .dropdown-menu hr {
+            border: none;
+            height: 1px;
+            background: #e2e8f0;
+            margin: 8px 0;
+        }
+
+        .mobile-menu {
+            display: none;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-menu.show {
+            display: block;
+        }
+
+        .mobile-nav {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .mobile-nav .nav-link {
+            padding: 16px;
+            border-radius: 12px;
+        }
+
+        .mobile-nav .add-recipe {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .mobile-nav .add-recipe:hover {
+            opacity: 0.9;
+        }
+
+        /* App Content */
+        .app-content {
+            min-height: calc(100vh - 70px);
+            padding-bottom: 80px;
+        }
+
+        @media (min-width: 768px) {
+            .app-content {
+                padding-bottom: 0;
+            }
+        }
+
+        /* Welcome Section */
+        .welcome-section {
+            position: relative;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 20px 0;
+            color: white;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(102, 126, 234, 0.25);
+        }
+
+        .welcome-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .welcome-title h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .welcome-title i {
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .welcome-content p {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .quick-actions h3 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a202c;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        @media (min-width: 768px) {
+            .actions-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .action-btn {
+            padding: 20px;
+            border-radius: 16px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .action-btn.secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .action-btn.outline {
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .action-btn.outline:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        /* Feed */
+        .feed {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .post-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .post-card:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .post-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .post-author {
+            flex: 1;
+        }
+
+        .author-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .author-name span {
+            font-weight: 700;
+            color: #1a202c;
+        }
+
+        .author-badge {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .author-badge.chef {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .author-badge.food-lover {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .post-time {
+            color: #667eea;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .post-content {
+            color: #374151;
+            font-size: 16px;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .post-image {
+            position: relative;
+            height: 300px;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .post-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .post-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+        }
+
+        .action-btn-small {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            border: none;
+            color: #64748b;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn-small:hover {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .action-btn-small.liked {
+            color: #f5576c;
+        }
+
+        .action-btn-small.bookmark:hover {
+            color: #f093fb;
+        }
+
+        /* Mobile Bottom Navigation */
+        .mobile-bottom-nav {
+            display: flex;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid #e2e8f0;
+            z-index: 50;
+            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 12px 0;
+        }
+
+        @media (min-width: 768px) {
+            .mobile-bottom-nav {
+                display: none;
+            }
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #64748b;
+            transition: all 0.3s ease;
+            margin: 0 4px;
+        }
+
+        .nav-item:hover {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .nav-item.active {
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 14px rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .nav-item span {
+            font-size: 12px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <!-- App Header -->
+    <header class="app-header">
+        <div class="container">
+            <div class="app-nav">
+                <!-- Mobile Menu -->
+                <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <!-- Logo -->
+                <div class="logo" onclick="window.location.href='home.html'">
+                    <div class="logo-icon">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <div class="logo-text">
+                        <span class="logo-title">FoodieHive</span>
+                        <div class="logo-subtitle">Share Your Culinary Passion</div>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <nav class="desktop-nav">
+                    <a href="home.html" class="nav-link active">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    <a href="recipes.html" class="nav-link">
+                        <i class="fas fa-utensils"></i>
+                        <span>Recipes</span>
+                    </a>
+                    <a href="blogs.html" class="nav-link">
+                        <i class="fas fa-pen"></i>
+                        <span>Blogs</span>
+                    </a>
+                    <a href="restaurants.html" class="nav-link">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Restaurants</span>
+                    </a>
+                    <a href="community.html" class="nav-link">
+                        <i class="fas fa-users"></i>
+                        <span>Community</span>
+                    </a>
+                </nav>
+
+                <!-- Search Bar -->
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search delicious recipes...">
+                </div>
+
+                <!-- Add Recipe Button -->
+                <a href="add-recipe.html" class="btn btn-secondary">
+                    <i class="fas fa-plus"></i>
+                    Add Recipe
+                </a>
+
+                <!-- Profile Dropdown -->
+                <div class="profile-dropdown">
+                    <button class="profile-btn" onclick="toggleProfileMenu()">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face" alt="Profile">
+                    </button>
+                    <div class="dropdown-menu" id="profileMenu">
+                        <a href="profile.html">
+                            <i class="fas fa-user"></i>
+                            Profile
+                        </a>
+                        <a href="my-recipes.html">
+                            <i class="fas fa-utensils"></i>
+                            My Recipes
+                        </a>
+                        <a href="settings.html">
+                            <i class="fas fa-cog"></i>
+                            Settings
+                        </a>
+                        <hr>
+                        <a href="index.html">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" id="mobileMenu">
+            <nav class="mobile-nav">
+                <a href="home.html" class="nav-link active">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
+                <a href="recipes.html" class="nav-link">
+                    <i class="fas fa-utensils"></i>
+                    <span>Recipes</span>
+                </a>
+                <a href="blogs.html" class="nav-link">
+                    <i class="fas fa-pen"></i>
+                    <span>Blogs</span>
+                </a>
+                <a href="restaurants.html" class="nav-link">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Restaurants</span>
+                </a>
+                <a href="community.html" class="nav-link">
+                    <i class="fas fa-users"></i>
+                    <span>Community</span>
+                </a>
+                <a href="add-recipe.html" class="nav-link add-recipe">
+                    <i class="fas fa-plus"></i>
+                    <span>Add Recipe</span>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- App Content -->
+    <main class="app-content">
+        <div class="container">
+            <!-- Welcome Section -->
+            <div class="welcome-section">
+                <div class="welcome-content">
+                    <div class="welcome-title">
+                        <i class="fas fa-heart animate-float"></i>
+                        <h1>Welcome to Your Feed</h1>
+                        <i class="fas fa-utensils animate-float"></i>
+                    </div>
+                    <p>Discover what's cooking in your community</p>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <h3>What would you like to do today?</h3>
+                <div class="actions-grid">
+                    <a href="add-recipe.html" class="action-btn secondary">
+                        <i class="fas fa-plus"></i>
+                        Add Recipe
+                    </a>
+                    <a href="recipes.html" class="action-btn primary">
+                        Explore Recipes
+                    </a>
+                    <a href="restaurants.html" class="action-btn outline">
+                        Find Restaurants
+                    </a>
+                    <a href="community.html" class="action-btn outline">
+                        Join Community
+                    </a>
+                </div>
+            </div>
+
+            <!-- Feed -->
+            <div class="feed">
+                <!-- Post 1 -->
+                <div class="post-card">
+                    <div class="post-header">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=48&h=48&fit=crop&crop=face" alt="Alex Johnson" class="post-avatar">
+                        <div class="post-author">
+                            <div class="author-name">
+                                <span>Alex Johnson</span>
+                                <div class="author-badge chef">
+                                    <i class="fas fa-hat-chef"></i>
+                                    Chef
+                                </div>
+                            </div>
+                            <span class="post-time">2 hours ago</span>
+                        </div>
+                    </div>
+                    <p class="post-content">
+                        Just created this incredible rainbow Buddha bowl! 🌈 Perfect harmony of fresh flavors and vibrant colors ✨
+                    </p>
+                    <div class="post-image">
+                        <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&h=300&fit=crop" alt="Buddha Bowl">
+                    </div>
+                    <div class="post-actions">
+                        <div class="action-buttons">
+                            <button class="action-btn-small" onclick="toggleLike(this)">
+                                <i class="fas fa-heart"></i>
+                                124
+                            </button>
+                            <button class="action-btn-small">
+                                <i class="fas fa-comment"></i>
+                                18
+                            </button>
+                            <button class="action-btn-small">
+                                <i class="fas fa-share"></i>
+                                Share
+                            </button>
+                        </div>
+                        <button class="action-btn-small bookmark">
+                            <i class="fas fa-bookmark"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Post 2 -->
+                <div class="post-card">
+                    <div class="post-header">
+                        <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=48&h=48&fit=crop&crop=face" alt="Maria Kim" class="post-avatar">
+                        <div class="post-author">
+                            <div class="author-name">
+                                <span>Maria Kim</span>
+                                <div class="author-badge food-lover">
+                                    <i class="fas fa-heart"></i>
+                                    Food Lover
+                                </div>
+                            </div>
+                            <span class="post-time">4 hours ago</span>
+                        </div>
+                    </div>
+                    <p class="post-content">
+                        Sunday brunch magic with these cloud-like pancakes! 🥞 Recipe secrets revealed in comments below 👇
+                    </p>
+                    <div class="post-image">
+                        <img src="https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=500&h=300&fit=crop" alt="Pancakes">
+                    </div>
+                    <div class="post-actions">
+                        <div class="action-buttons">
+                            <button class="action-btn-small" onclick="toggleLike(this)">
+                                <i class="fas fa-heart"></i>
+                                89
+                            </button>
+                            <button class="action-btn-small">
+                                <i class="fas fa-comment"></i>
+                                12
+                            </button>
+                            <button class="action-btn-small">
+                                <i class="fas fa-share"></i>
+                                Share
+                            </button>
+                        </div>
+                        <button class="action-btn-small bookmark">
+                            <i class="fas fa-bookmark"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav">
+        <a href="home.html" class="nav-item active">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="recipes.html" class="nav-item">
+            <i class="fas fa-utensils"></i>
+            <span>Recipes</span>
+        </a>
+        <a href="blogs.html" class="nav-item">
+            <i class="fas fa-pen"></i>
+            <span>Blogs</span>
+        </a>
+        <a href="restaurants.html" class="nav-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>Restaurants</span>
+        </a>
+        <a href="community.html" class="nav-item">
+            <i class="fas fa-users"></i>
+            <span>Community</span>
+        </a>
+    </nav>
+
+    <script>
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById("mobileMenu");
+            mobileMenu.classList.toggle("show");
+        }
+
+        function toggleProfileMenu() {
+            const profileMenu = document.getElementById("profileMenu");
+            profileMenu.classList.toggle("show");
+        }
+
+        function toggleLike(button) {
+            button.classList.toggle("liked");
+            const icon = button.querySelector("i");
+            const count = button.querySelector("span");
+
+            if (button.classList.contains("liked")) {
+                icon.style.color = "#f5576c";
+                count.textContent = parseInt(count.textContent) + 1;
+            } else {
+                icon.style.color = "";
+                count.textContent = parseInt(count.textContent) - 1;
+            }
+        }
+
+        // Close menus when clicking outside
+        document.addEventListener("click", (event) => {
+            const mobileMenu = document.getElementById("mobileMenu");
+            const profileMenu = document.getElementById("profileMenu");
+            const mobileMenuBtn = document.querySelector(".mobile-menu-btn");
+            const profileBtn = document.querySelector(".profile-btn");
+
+            if (!mobileMenuBtn.contains(event.target) && !mobileMenu.contains(event.target)) {
+                mobileMenu.classList.remove("show");
+            }
+
+            if (!profileBtn.contains(event.target) && !profileMenu.contains(event.target)) {
+                profileMenu.classList.remove("show");
+            }
+        });
+    </script>
+</body>
+</html>

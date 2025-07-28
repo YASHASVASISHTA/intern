@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurants - FoodieHive</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: #1a202c;
+            background: #f8fafc;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        .app-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .app-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+            gap: 20px;
+        }
+
+        .mobile-menu-btn {
+            display: block;
+            background: none;
+            border: none;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #667eea;
+            transition: background-color 0.3s ease;
+        }
+
+        .mobile-menu-btn:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        @media (min-width: 768px) {
+            .mobile-menu-btn {
+                display: none;
+            }
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover .logo-icon {
+            transform: scale(1.1);
+        }
+
+        .logo-title {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-subtitle {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .desktop-nav {
+            display: none;
+            gap: 8px;
+        }
+
+        @media (min-width: 768px) {
+            .desktop-nav {
+                display: flex;
+            }
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #475569;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .nav-link.active {
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 14px rgba(102, 126, 234, 0.3);
+        }
+
+        .search-bar {
+            display: none;
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+            margin: 0 20px;
+        }
+
+        @media (min-width: 768px) {
+            .search-bar {
+                display: block;
+            }
+        }
+
+        .search-bar i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #667eea;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 12px 16px 12px 48px;
+            background: rgba(102, 126, 234, 0.05);
+            border: 2px solid rgba(102, 126, 234, 0.1);
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            gap: 8px;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(240, 147, 251, 0.3);
+        }
+
+        .profile-dropdown {
+            position: relative;
+        }
+
+        .profile-btn {
+            background: none;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            padding: 4px;
+        }
+
+        .profile-btn:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .profile-btn img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            min-width: 200px;
+            padding: 8px;
+            margin-top: 8px;
+            display: none;
+            z-index: 50;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #374151;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+
+        .dropdown-menu a:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+
+        .dropdown-menu hr {
+            border: none;
+            height: 1px;
+            background: #e2e8f0;
+            margin: 8px 0;
+        }
+
+        .mobile-menu {
+            display: none;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-menu.show {
+            display: block;
+        }
+
+        .mobile-nav {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .mobile-nav .nav-link {
+            padding: 16px;
+            border-radius: 12px;
+        }
+
+        .mobile-nav .add-recipe {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .mobile-nav .add-recipe:hover {
+            opacity: 0.9;
+        }
+
+        /* App Content */
+        .app-content {
+            min-height: calc(100vh - 70px);
+            padding-bottom: 80px;
+        }
+
+        @media (min-width: 768px) {
+            .app-content {
+                padding-bottom: 0;
+            }
+        }
+
+        /* Page Header */
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 20px 0;
+            color: white;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(102, 126, 234, 0.25);
+        }
+
+        .page-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .page-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .page-header p {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .filter-btn {
+            padding: 12px 24px;
+            border-radius: 20px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            background: transparent;
+            color: #667eea;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: rgba(102, 126, 234, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 14px rgba(240, 147, 251, 0.3);
+        }
+
+        /* Restaurant Grid */
+        .restaurants-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+
+        @media (min-width: 768px) {
+            .restaurants-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .restaurants-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .restaurant-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .restaurant-card:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+            transform: translateY(-5px);
+        }
+
+        .restaurant-image {
+            position: relative;
+            height: 200px;
+        }
+
+        .restaurant-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .restaurant-status {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+        }
+
+        .restaurant-status.open {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .restaurant-status.closed {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .restaurant-rating {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 8px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 600;
+            color: #1a202c;
+        }
+
+        .restaurant-rating i {
+            color: #f59e0b;
+        }
+
+        .restaurant-content {
+            padding: 20px;
+        }
+
+        .restaurant-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 8px;
+            transition: color 0.3s ease;
+        }
+
+        .restaurant-card:hover .restaurant-title {
+            color: #667eea;
+        }
+
+        .restaurant-cuisine {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .restaurant-description {
+            color: #64748b;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .restaurant-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .restaurant-location {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .restaurant-location i {
+            color: #667eea;
+        }
+
+        .restaurant-price {
+            font-weight: 700;
+            color: #1a202c;
+        }
+
+        .restaurant-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .restaurant-engagement {
+            display: flex;
+            gap: 16px;
+        }
+
+        .restaurant-stat {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .restaurant-stat i {
+            color: #667eea;
+        }
+
+        .restaurant-distance {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 600;
+        }
+
+        .restaurant-distance i {
+            color: #f093fb;
+        }
+
+        /* Mobile Bottom Navigation */
+        .mobile-bottom-nav {
+            display: flex;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid #e2e8f0;
+            z-index: 50;
+            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 12px 0;
+        }
+
+        @media (min-width: 768px) {
+            .mobile-bottom-nav {
+                display: none;
+            }
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #64748b;
+            transition: all 0.3s ease;
+            margin: 0 4px;
+        }
+
+        .nav-item:hover {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .nav-item.active {
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 14px rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .nav-item span {
+            font-size: 12px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <!-- App Header -->
+    <header class="app-header">
+        <div class="container">
+            <div class="app-nav">
+                <!-- Mobile Menu -->
+                <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <!-- Logo -->
+                <div class="logo" onclick="window.location.href='home.html'">
+                    <div class="logo-icon">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <div class="logo-text">
+                        <span class="logo-title">FoodieHive</span>
+                        <div class="logo-subtitle">Share Your Culinary Passion</div>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <nav class="desktop-nav">
+                    <a href="home.html" class="nav-link">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    <a href="recipes.html" class="nav-link">
+                        <i class="fas fa-utensils"></i>
+                        <span>Recipes</span>
+                    </a>
+                    <a href="blogs.html" class="nav-link">
+                        <i class="fas fa-pen"></i>
+                        <span>Blogs</span>
+                    </a>
+                    <a href="restaurants.html" class="nav-link active">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Restaurants</span>
+                    </a>
+                    <a href="community.html" class="nav-link">
+                        <i class="fas fa-users"></i>
+                        <span>Community</span>
+                    </a>
+                </nav>
+
+                <!-- Search Bar -->
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search restaurants...">
+                </div>
+
+                <!-- Add Recipe Button -->
+                <a href="add-recipe.html" class="btn btn-secondary">
+                    <i class="fas fa-plus"></i>
+                    Add Recipe
+                </a>
+
+                <!-- Profile Dropdown -->
+                <div class="profile-dropdown">
+                    <button class="profile-btn" onclick="toggleProfileMenu()">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face" alt="Profile">
+                    </button>
+                    <div class="dropdown-menu" id="profileMenu">
+                        <a href="profile.html">
+                            <i class="fas fa-user"></i>
+                            Profile
+                        </a>
+                        <a href="my-recipes.html">
+                            <i class="fas fa-utensils"></i>
+                            My Recipes
+                        </a>
+                        <a href="settings.html">
+                            <i class="fas fa-cog"></i>
+                            Settings
+                        </a>
+                        <hr>
+                        <a href="index.html">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" id="mobileMenu">
+            <nav class="mobile-nav">
+                <a href="home.html" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
+                <a href="recipes.html" class="nav-link">
+                    <i class="fas fa-utensils"></i>
+                    <span>Recipes</span>
+                </a>
+                <a href="blogs.html" class="nav-link">
+                    <i class="fas fa-pen"></i>
+                    <span>Blogs</span>
+                </a>
+                <a href="restaurants.html" class="nav-link active">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Restaurants</span>
+                </a>
+                <a href="community.html" class="nav-link">
+                    <i class="fas fa-users"></i>
+                    <span>Community</span>
+                </a>
+                <a href="add-recipe.html" class="nav-link add-recipe">
+                    <i class="fas fa-plus"></i>
+                    <span>Add Recipe</span>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- App Content -->
+    <main class="app-content">
+        <div class="container">
+            <div class="page-header">
+                <div class="page-title">
+                    <i class="fas fa-map-marker-alt animate-float"></i>
+                    <h1>Restaurants</h1>
+                    <i class="fas fa-store animate-float"></i>
+                </div>
+                <p>Discover amazing dining experiences near you</p>
+            </div>
+
+            <!-- Filters -->
+            <div class="filters">
+                <button class="filter-btn active" onclick="filterRestaurants('All', this)">All Restaurants</button>
+                <button class="filter-btn" onclick="filterRestaurants('Italian', this)">Italian</button>
+                <button class="filter-btn" onclick="filterRestaurants('Asian', this)">Asian</button>
+                <button class="filter-btn" onclick="filterRestaurants('Mexican', this)">Mexican</button>
+                <button class="filter-btn" onclick="filterRestaurants('American', this)">American</button>
+                <button class="filter-btn" onclick="filterRestaurants('Mediterranean', this)">Mediterranean</button>
+            </div>
+
+            <!-- Restaurant Grid -->
+            <div class="restaurants-grid" id="restaurantsGrid">
+                <!-- Restaurants will be populated by JavaScript -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav">
+        <a href="home.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="recipes.html" class="nav-item">
+            <i class="fas fa-utensils"></i>
+            <span>Recipes</span>
+        </a>
+        <a href="blogs.html" class="nav-item">
+            <i class="fas fa-pen"></i>
+            <span>Blogs</span>
+        </a>
+        <a href="restaurants.html" class="nav-item active">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>Restaurants</span>
+        </a>
+        <a href="community.html" class="nav-item">
+            <i class="fas fa-users"></i>
+            <span>Community</span>
+        </a>
+    </nav>
+
+    <script>
+        const restaurants = [
+            {
+                id: 1,
+                name: "Bella Vista Italian",
+                cuisine: "Italian",
+                image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=200&fit=crop",
+                rating: 4.8,
+                status: "open",
+                location: "Downtown",
+                price: "$$",
+                description: "Authentic Italian cuisine with a modern twist. Fresh pasta made daily.",
+                likes: 234,
+                reviews: 89,
+                distance: "0.5 mi"
+            },
+            {
+                id: 2,
+                name: "Sakura Sushi Bar",
+                cuisine: "Asian",
+                image: "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=200&fit=crop",
+                rating: 4.9,
+                status: "open",
+                location: "Midtown",
+                price: "$$$",
+                description: "Premium sushi and Japanese cuisine in an elegant setting.",
+                likes: 189,
+                reviews: 156,
+                distance: "1.2 mi"
+            },
+            {
+                id: 3,
+                name: "Taco Libre",
+                cuisine: "Mexican",
+                image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=200&fit=crop",
+                rating: 4.6,
+                status: "open",
+                location: "East Side",
+                price: "$",
+                description: "Vibrant Mexican street food with fresh ingredients and bold flavors.",
+                likes: 156,
+                reviews: 78,
+                distance: "2.1 mi"
+            },
+            {
+                id: 4,
+                name: "The Garden Bistro",
+                cuisine: "Mediterranean",
+                image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=200&fit=crop",
+                rating: 4.7,
+                status: "closed",
+                location: "West End",
+                price: "$$",
+                description: "Fresh Mediterranean dishes with locally sourced ingredients.",
+                likes: 298,
+                reviews: 134,
+                distance: "1.8 mi"
+            },
+            {
+                id: 5,
+                name: "Burger Junction",
+                cuisine: "American",
+                image: "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400&h=200&fit=crop",
+                rating: 4.4,
+                status: "open",
+                location: "City Center",
+                price: "$$",
+                description: "Gourmet burgers and craft beer in a casual atmosphere.",
+                likes: 445,
+                reviews: 267,
+                distance: "0.8 mi"
+            },
+            {
+                id: 6,
+                name: "Spice Route",
+                cuisine: "Asian",
+                image: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400&h=200&fit=crop",
+                rating: 4.5,
+                status: "open",
+                location: "North Quarter",
+                price: "$$",
+                description: "Authentic Indian and Thai cuisine with aromatic spices.",
+                likes: 367,
+                reviews: 198,
+                distance: "3.2 mi"
+            }
+        ];
+
+        function loadRestaurants(restaurantsToShow = restaurants) {
+            const restaurantsGrid = document.getElementById("restaurantsGrid");
+            restaurantsGrid.innerHTML = restaurantsToShow
+                .map(
+                    (restaurant) => `
+                    <div class="restaurant-card" onclick="viewRestaurant(${restaurant.id})">
+                        <div class="restaurant-image">
+                            <img src="${restaurant.image}" alt="${restaurant.name}">
+                            <div class="restaurant-status ${restaurant.status}">${restaurant.status === 'open' ? 'Open' : 'Closed'}</div>
+                            <div class="restaurant-rating">
+                                <i class="fas fa-star"></i>
+                                ${restaurant.rating}
+                            </div>
+                        </div>
+                        <div class="restaurant-content">
+                            <h3 class="restaurant-title">${restaurant.name}</h3>
+                            <div class="restaurant-cuisine">
+                                <i class="fas fa-utensils"></i>
+                                ${restaurant.cuisine}
+                            </div>
+                            <p class="restaurant-description">${restaurant.description}</p>
+                            <div class="restaurant-meta">
+                                <div class="restaurant-location">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    ${restaurant.location}
+                                </div>
+                                <div class="restaurant-price">${restaurant.price}</div>
+                            </div>
+                            <div class="restaurant-stats">
+                                <div class="restaurant-engagement">
+                                    <div class="restaurant-stat">
+                                        <i class="fas fa-heart"></i>
+                                        <span>${restaurant.likes}</span>
+                                    </div>
+                                    <div class="restaurant-stat">
+                                        <i class="fas fa-star"></i>
+                                        <span>${restaurant.reviews}</span>
+                                    </div>
+                                </div>
+                                <div class="restaurant-distance">
+                                    <i class="fas fa-location-arrow"></i>
+                                    <span>${restaurant.distance}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+                )
+                .join("");
+        }
+
+        function filterRestaurants(cuisine, button) {
+            // Update active filter button
+            document.querySelectorAll(".filter-btn").forEach((btn) => {
+                btn.classList.remove("active");
+            });
+            button.classList.add("active");
+
+            // Filter and display restaurants
+            const filteredRestaurants = cuisine === "All" ? restaurants : restaurants.filter((restaurant) => restaurant.cuisine === cuisine);
+            loadRestaurants(filteredRestaurants);
+        }
+
+        function viewRestaurant(id) {
+            alert(`Viewing restaurant ${id} - Restaurant detail page coming soon!`);
+        }
+
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById("mobileMenu");
+            mobileMenu.classList.toggle("show");
+        }
+
+        function toggleProfileMenu() {
+            const profileMenu = document.getElementById("profileMenu");
+            profileMenu.classList.toggle("show");
+        }
+
+        // Close menus when clicking outside
+        document.addEventListener("click", (event) => {
+            const mobileMenu = document.getElementById("mobileMenu");
+            const profileMenu = document.getElementById("profileMenu");
+            const mobileMenuBtn = document.querySelector(".mobile-menu-btn");
+            const profileBtn = document.querySelector(".profile-btn");
+
+            if (!mobileMenuBtn.contains(event.target) && !mobileMenu.contains(event.target)) {
+                mobileMenu.classList.remove("show");
+            }
+
+            if (!profileBtn.contains(event.target) && !profileMenu.contains(event.target)) {
+                profileMenu.classList.remove("show");
+            }
+        });
+
+        // Initialize restaurants on page load
+        document.addEventListener("DOMContentLoaded", () => {
+            loadRestaurants();
+        });
+    </script>
+</body>
+</html>

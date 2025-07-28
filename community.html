@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community - FoodieHive</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: #1a202c;
+            background: #f8fafc;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        .app-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .app-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+            gap: 20px;
+        }
+
+        .mobile-menu-btn {
+            display: block;
+            background: none;
+            border: none;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #667eea;
+            transition: background-color 0.3s ease;
+        }
+
+        .mobile-menu-btn:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        @media (min-width: 768px) {
+            .mobile-menu-btn {
+                display: none;
+            }
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover .logo-icon {
+            transform: scale(1.1);
+        }
+
+        .logo-title {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-subtitle {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .desktop-nav {
+            display: none;
+            gap: 8px;
+        }
+
+        @media (min-width: 768px) {
+            .desktop-nav {
+                display: flex;
+            }
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #475569;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .nav-link.active {
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 14px rgba(102, 126, 234, 0.3);
+        }
+
+        .search-bar {
+            display: none;
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+            margin: 0 20px;
+        }
+
+        @media (min-width: 768px) {
+            .search-bar {
+                display: block;
+            }
+        }
+
+        .search-bar i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #667eea;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 12px 16px 12px 48px;
+            background: rgba(102, 126, 234, 0.05);
+            border: 2px solid rgba(102, 126, 234, 0.1);
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            gap: 8px;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(240, 147, 251, 0.3);
+        }
+
+        .profile-dropdown {
+            position: relative;
+        }
+
+        .profile-btn {
+            background: none;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            padding: 4px;
+        }
+
+        .profile-btn:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .profile-btn img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            min-width: 200px;
+            padding: 8px;
+            margin-top: 8px;
+            display: none;
+            z-index: 50;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #374151;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+
+        .dropdown-menu a:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+
+        .dropdown-menu hr {
+            border: none;
+            height: 1px;
+            background: #e2e8f0;
+            margin: 8px 0;
+        }
+
+        .mobile-menu {
+            display: none;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-menu.show {
+            display: block;
+        }
+
+        .mobile-nav {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .mobile-nav .nav-link {
+            padding: 16px;
+            border-radius: 12px;
+        }
+
+        .mobile-nav .add-recipe {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .mobile-nav .add-recipe:hover {
+            opacity: 0.9;
+        }
+
+        /* App Content */
+        .app-content {
+            min-height: calc(100vh - 70px);
+            padding-bottom: 80px;
+        }
+
+        @media (min-width: 768px) {
+            .app-content {
+                padding-bottom: 0;
+            }
+        }
+
+        /* Page Header */
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 20px 0;
+            color: white;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(102, 126, 234, 0.25);
+        }
+
+        .page-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .page-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .page-header p {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Community Layout */
+        .community-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        @media (min-width: 1024px) {
+            .community-layout {
+                grid-template-columns: 1fr 300px;
+            }
+        }
+
+        /* Main Feed */
+        .main-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        /* Create Post */
+        .create-post {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .create-post-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .create-post-header img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .create-post-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid rgba(102, 126, 234, 0.1);
+            border-radius: 25px;
+            background: rgba(102, 126, 234, 0.05);
+            font-size: 16px;
+            resize: none;
+            min-height: 60px;
+        }
+
+        .create-post-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .create-post-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .post-options {
+            display: flex;
+            gap: 15px;
+        }
+
+        .post-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .post-option:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* Community Posts */
+        .community-post {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .community-post:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .post-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .post-user-info h4 {
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 2px;
+        }
+
+        .post-time {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .post-content {
+            margin-bottom: 20px;
+            line-height: 1.6;
+            color: #374151;
+        }
+
+        .post-image {
+            width: 100%;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            max-height: 400px;
+            object-fit: cover;
+        }
+
+        .post-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .post-tag {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .post-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .post-engagement {
+            display: flex;
+            gap: 20px;
+        }
+
+        .engagement-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: transparent;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .engagement-btn:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            transform: translateY(-1px);
+        }
+
+        .engagement-btn.liked {
+            color: #ef4444;
+        }
+
+        .engagement-btn.liked:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .sidebar-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-title i {
+            color: #667eea;
+        }
+
+        /* Trending Topics */
+        .trending-topic {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 8px;
+        }
+
+        .trending-topic:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .trending-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .trending-info h5 {
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 2px;
+        }
+
+        .trending-info span {
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        /* Active Users */
+        .active-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 8px;
+        }
+
+        .active-user:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .active-user img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .active-user-info h5 {
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 2px;
+        }
+
+        .active-user-info span {
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .online-indicator {
+            width: 12px;
+            height: 12px;
+            background: #10b981;
+            border-radius: 50%;
+            border: 2px solid white;
+            margin-left: auto;
+        }
+
+        /* Mobile Bottom Navigation */
+        .mobile-bottom-nav {
+            display: flex;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid #e2e8f0;
+            z-index: 50;
+            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 12px 0;
+        }
+
+        @media (min-width: 768px) {
+            .mobile-bottom-nav {
+                display: none;
+            }
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #64748b;
+            transition: all 0.3s ease;
+            margin: 0 4px;
+        }
+
+        .nav-item:hover {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .nav-item.active {
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 14px rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .nav-item span {
+            font-size: 12px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <!-- App Header -->
+    <header class="app-header">
+        <div class="container">
+            <div class="app-nav">
+                <!-- Mobile Menu -->
+                <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <!-- Logo -->
+                <div class="logo" onclick="window.location.href='home.html'">
+                    <div class="logo-icon">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <div class="logo-text">
+                        <span class="logo-title">FoodieHive</span>
+                        <div class="logo-subtitle">Share Your Culinary Passion</div>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <nav class="desktop-nav">
+                    <a href="home.html" class="nav-link">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    <a href="recipes.html" class="nav-link">
+                        <i class="fas fa-utensils"></i>
+                        <span>Recipes</span>
+                    </a>
+                    <a href="blogs.html" class="nav-link">
+                        <i class="fas fa-pen"></i>
+                        <span>Blogs</span>
+                    </a>
+                    <a href="restaurants.html" class="nav-link">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Restaurants</span>
+                    </a>
+                    <a href="community.html" class="nav-link active">
+                        <i class="fas fa-users"></i>
+                        <span>Community</span>
+                    </a>
+                </nav>
+
+                <!-- Search Bar -->
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search community posts...">
+                </div>
+
+                <!-- Add Recipe Button -->
+                <a href="add-recipe.html" class="btn btn-secondary">
+                    <i class="fas fa-plus"></i>
+                    Add Recipe
+                </a>
+
+                <!-- Profile Dropdown -->
+                <div class="profile-dropdown">
+                    <button class="profile-btn" onclick="toggleProfileMenu()">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face" alt="Profile">
+                    </button>
+                    <div class="dropdown-menu" id="profileMenu">
+                        <a href="profile.html">
+                            <i class="fas fa-user"></i>
+                            Profile
+                        </a>
+                        <a href="my-recipes.html">
+                            <i class="fas fa-utensils"></i>
+                            My Recipes
+                        </a>
+                        <a href="settings.html">
+                            <i class="fas fa-cog"></i>
+                            Settings
+                        </a>
+                        <hr>
+                        <a href="index.html">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" id="mobileMenu">
+            <nav class="mobile-nav">
+                <a href="home.html" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
+                <a href="recipes.html" class="nav-link">
+                    <i class="fas fa-utensils"></i>
+                    <span>Recipes</span>
+                </a>
+                <a href="blogs.html" class="nav-link">
+                    <i class="fas fa-pen"></i>
+                    <span>Blogs</span>
+                </a>
+                <a href="restaurants.html" class="nav-link">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Restaurants</span>
+                </a>
+                <a href="community.html" class="nav-link active">
+                    <i class="fas fa-users"></i>
+                    <span>Community</span>
+                </a>
+                <a href="add-recipe.html" class="nav-link add-recipe">
+                    <i class="fas fa-plus"></i>
+                    <span>Add Recipe</span>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- App Content -->
+    <main class="app-content">
+        <div class="container">
+            <div class="page-header">
+                <div class="page-title">
+                    <i class="fas fa-users animate-float"></i>
+                    <h1>Community</h1>
+                    <i class="fas fa-heart animate-float"></i>
+                </div>
+                <p>Connect with fellow food enthusiasts and share your culinary journey</p>
+            </div>
+
+            <div class="community-layout">
+                <!-- Main Feed -->
+                <div class="main-feed">
+                    <!-- Create Post -->
+                    <div class="create-post">
+                        <div class="create-post-header">
+                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&h=50&fit=crop&crop=face" alt="Your Profile">
+                            <textarea class="create-post-input" placeholder="Share your culinary thoughts, tips, or ask questions..."></textarea>
+                        </div>
+                        <div class="create-post-actions">
+                            <div class="post-options">
+                                <div class="post-option">
+                                    <i class="fas fa-image"></i>
+                                    <span>Photo</span>
+                                </div>
+                                <div class="post-option">
+                                    <i class="fas fa-utensils"></i>
+                                    <span>Recipe</span>
+                                </div>
+                                <div class="post-option">
+                                    <i class="fas fa-poll"></i>
+                                    <span>Poll</span>
+                                </div>
+                            </div>
+                            <button class="btn btn-secondary">
+                                <i class="fas fa-paper-plane"></i>
+                                Post
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Community Posts -->
+                    <div id="communityPosts">
+                        <!-- Posts will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="sidebar">
+                    <!-- Trending Topics -->
+                    <div class="sidebar-card">
+                        <div class="sidebar-title">
+                            <i class="fas fa-fire"></i>
+                            Trending Topics
+                        </div>
+                        <div class="trending-topic">
+                            <div class="trending-number">1</div>
+                            <div class="trending-info">
+                                <h5>#SourdoughTips</h5>
+                                <span>2.4k posts</span>
+                            </div>
+                        </div>
+                        <div class="trending-topic">
+                            <div class="trending-number">2</div>
+                            <div class="trending-info">
+                                <h5>#VeganRecipes</h5>
+                                <span>1.8k posts</span>
+                            </div>
+                        </div>
+                        <div class="trending-topic">
+                            <div class="trending-number">3</div>
+                            <div class="trending-info">
+                                <h5>#MealPrep</h5>
+                                <span>1.5k posts</span>
+                            </div>
+                        </div>
+                        <div class="trending-topic">
+                            <div class="trending-number">4</div>
+                            <div class="trending-info">
+                                <h5>#BakingFails</h5>
+                                <span>1.2k posts</span>
+                            </div>
+                        </div>
+                        <div class="trending-topic">
+                            <div class="trending-number">5</div>
+                            <div class="trending-info">
+                                <h5>#KitchenHacks</h5>
+                                <span>980 posts</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Users -->
+                    <div class="sidebar-card">
+                        <div class="sidebar-title">
+                            <i class="fas fa-circle"></i>
+                            Active Now
+                        </div>
+                        <div class="active-user">
+                            <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face" alt="Maria">
+                            <div class="active-user-info">
+                                <h5>Maria Rodriguez</h5>
+                                <span>Chef & Food Blogger</span>
+                            </div>
+                            <div class="online-indicator"></div>
+                        </div>
+                        <div class="active-user">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face" alt="David">
+                            <div class="active-user-info">
+                                <h5>David Kim</h5>
+                                <span>Home Cook</span>
+                            </div>
+                            <div class="online-indicator"></div>
+                        </div>
+                        <div class="active-user">
+                            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face" alt="Sarah">
+                            <div class="active-user-info">
+                                <h5>Sarah Chen</h5>
+                                <span>Pastry Chef</span>
+                            </div>
+                            <div class="online-indicator"></div>
+                        </div>
+                        <div class="active-user">
+                            <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=40&h=40&fit=crop&crop=face" alt="Emma">
+                            <div class="active-user-info">
+                                <h5>Emma Wilson</h5>
+                                <span>Food Photographer</span>
+                            </div>
+                            <div class="online-indicator"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav">
+        <a href="home.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="recipes.html" class="nav-item">
+            <i class="fas fa-utensils"></i>
+            <span>Recipes</span>
+        </a>
+        <a href="blogs.html" class="nav-item">
+            <i class="fas fa-pen"></i>
+            <span>Blogs</span>
+        </a>
+        <a href="restaurants.html" class="nav-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>Restaurants</span>
+        </a>
+        <a href="community.html" class="nav-item active">
+            <i class="fas fa-users"></i>
+            <span>Community</span>
+        </a>
+    </nav>
+
+    <script>
+        const communityPosts = [
+            {
+                id: 1,
+                user: "Maria Rodriguez",
+                avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=50&h=50&fit=crop&crop=face",
+                time: "2 hours ago",
+                content: "Just finished making my grandmother's secret paella recipe! The key is using bomba rice and letting the socarrat form naturally. Who else loves that crispy bottom layer? 🥘",
+                image: "https://images.unsplash.com/photo-1534080564583-6be75777b70a?w=500&h=300&fit=crop",
+                tags: ["#Paella", "#Spanish", "#FamilyRecipe"],
+                likes: 45,
+                comments: 12,
+                shares: 8,
+                liked: false
+            },
+            {
+                id: 2,
+                user: "David Kim",
+                avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face",
+                time: "4 hours ago",
+                content: "Quick question for the baking community: What's your go-to method for achieving the perfect sourdough crust? I've been experimenting with steam techniques but would love to hear your tips!",
+                tags: ["#SourdoughTips", "#Baking", "#Help"],
+                likes: 23,
+                comments: 18,
+                shares: 3,
+                liked: true
+            },
+            {
+                id: 3,
+                user: "Sarah Chen",
+                avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=50&h=50&fit=crop&crop=face",
+                time: "6 hours ago",
+                content: "Made these matcha white chocolate cookies for a friend's birthday party. The earthy matcha pairs beautifully with the sweet white chocolate. Recipe in comments! 🍪",
+                image: "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=500&h=300&fit=crop",
+                tags: ["#Matcha", "#Cookies", "#Dessert"],
+                likes: 67,
+                comments: 24,
+                shares: 15,
+                liked: false
+            },
+            {
+                id: 4,
+                user: "Emma Wilson",
+                avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=50&h=50&fit=crop&crop=face",
+                time: "8 hours ago",
+                content: "Sunday meal prep session complete! This week's menu: Mediterranean quinoa bowls, Thai curry with jasmine rice, and overnight oats with fresh berries. Prep day = stress-free week! 💪",
+                image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&h=300&fit=crop",
+                tags: ["#MealPrep", "#Healthy", "#Sunday"],
+                likes: 89,
+                comments: 31,
+                shares: 22,
+                liked: true
+            },
+            {
+                id: 5,
+                user: "Chef Antonio",
+                avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=50&h=50&fit=crop&crop=face",
+                time: "12 hours ago",
+                content: "Pro tip: Always let your steak rest for at least 5 minutes after cooking. This allows the juices to redistribute throughout the meat, resulting in a more tender and flavorful bite. What's your favorite cut for grilling?",
+                tags: ["#SteakTips", "#Grilling", "#ProTips"],
+                likes: 156,
+                comments: 43,
+                shares: 28,
+                liked: false
+            }
+        ];
+
+        function loadCommunityPosts() {
+            const postsContainer = document.getElementById("communityPosts");
+            postsContainer.innerHTML = communityPosts
+                .map(
+                    (post) => `
+                    <div class="community-post">
+                        <div class="post-header">
+                            <img src="${post.avatar}" alt="${post.user}" class="post-avatar">
+                            <div class="post-user-info">
+                                <h4>${post.user}</h4>
+                                <div class="post-time">${post.time}</div>
+                            </div>
+                        </div>
+                        <div class="post-content">
+                            ${post.content}
+                        </div>
+                        ${post.image ? `<img src="${post.image}" alt="Post image" class="post-image">` : ''}
+                        <div class="post-tags">
+                            ${post.tags.map(tag => `<span class="post-tag">${tag}</span>`).join('')}
+                        </div>
+                        <div class="post-actions">
+                            <div class="post-engagement">
+                                <button class="engagement-btn ${post.liked ? 'liked' : ''}" onclick="toggleLike(${post.id}, this)">
+                                    <i class="fas fa-heart"></i>
+                                    <span>${post.likes}</span>
+                                </button>
+                                <button class="engagement-btn" onclick="showComments(${post.id})">
+                                    <i class="fas fa-comment"></i>
+                                    <span>${post.comments}</span>
+                                </button>
+                                <button class="engagement-btn" onclick="sharePost(${post.id})">
+                                    <i class="fas fa-share"></i>
+                                    <span>${post.shares}</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `
+                )
+                .join("");
+        }
+
+        function toggleLike(postId, button) {
+            const post = communityPosts.find(p => p.id === postId);
+            const likeCount = button.querySelector('span');
+            
+            if (post.liked) {
+                post.likes--;
+                post.liked = false;
+                button.classList.remove('liked');
+            } else {
+                post.likes++;
+                post.liked = true;
+                button.classList.add('liked');
+            }
+            
+            likeCount.textContent = post.likes;
+        }
+
+        function showComments(postId) {
+            alert(`Comments for post ${postId} - Comments feature coming soon!`);
+        }
+
+        function sharePost(postId) {
+            alert(`Sharing post ${postId} - Share feature coming soon!`);
+        }
+
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById("mobileMenu");
+            mobileMenu.classList.toggle("show");
+        }
+
+        function toggleProfileMenu() {
+            const profileMenu = document.getElementById("profileMenu");
+            profileMenu.classList.toggle("show");
+        }
+
+        // Close menus when clicking outside
+        document.addEventListener("click", (event) => {
+            const mobileMenu = document.getElementById("mobileMenu");
+            const profileMenu = document.getElementById("profileMenu");
+            const mobileMenuBtn = document.querySelector(".mobile-menu-btn");
+            const profileBtn = document.querySelector(".profile-btn");
+
+            if (!mobileMenuBtn.contains(event.target) && !mobileMenu.contains(event.target)) {
+                mobileMenu.classList.remove("show");
+            }
+
+            if (!profileBtn.contains(event.target) && !profileMenu.contains(event.target)) {
+                profileMenu.classList.remove("show");
+            }
+        });
+
+        // Initialize posts on page load
+        document.addEventListener("DOMContentLoaded", () => {
+            loadCommunityPosts();
+        });
+    </script>
+</body>
+</html>

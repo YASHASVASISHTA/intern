@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blogs - FoodieHive</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: #1a202c;
+            background: #f8fafc;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        .app-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .app-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+            gap: 20px;
+        }
+
+        .mobile-menu-btn {
+            display: block;
+            background: none;
+            border: none;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #667eea;
+            transition: background-color 0.3s ease;
+        }
+
+        .mobile-menu-btn:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        @media (min-width: 768px) {
+            .mobile-menu-btn {
+                display: none;
+            }
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover .logo-icon {
+            transform: scale(1.1);
+        }
+
+        .logo-title {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-subtitle {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .desktop-nav {
+            display: none;
+            gap: 8px;
+        }
+
+        @media (min-width: 768px) {
+            .desktop-nav {
+                display: flex;
+            }
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #475569;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .nav-link.active {
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 14px rgba(102, 126, 234, 0.3);
+        }
+
+        .search-bar {
+            display: none;
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+            margin: 0 20px;
+        }
+
+        @media (min-width: 768px) {
+            .search-bar {
+                display: block;
+            }
+        }
+
+        .search-bar i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #667eea;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 12px 16px 12px 48px;
+            background: rgba(102, 126, 234, 0.05);
+            border: 2px solid rgba(102, 126, 234, 0.1);
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            gap: 8px;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(240, 147, 251, 0.3);
+        }
+
+        .profile-dropdown {
+            position: relative;
+        }
+
+        .profile-btn {
+            background: none;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            padding: 4px;
+        }
+
+        .profile-btn:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .profile-btn img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            min-width: 200px;
+            padding: 8px;
+            margin-top: 8px;
+            display: none;
+            z-index: 50;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #374151;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+
+        .dropdown-menu a:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+
+        .dropdown-menu hr {
+            border: none;
+            height: 1px;
+            background: #e2e8f0;
+            margin: 8px 0;
+        }
+
+        .mobile-menu {
+            display: none;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-menu.show {
+            display: block;
+        }
+
+        .mobile-nav {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .mobile-nav .nav-link {
+            padding: 16px;
+            border-radius: 12px;
+        }
+
+        .mobile-nav .add-recipe {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .mobile-nav .add-recipe:hover {
+            opacity: 0.9;
+        }
+
+        /* App Content */
+        .app-content {
+            min-height: calc(100vh - 70px);
+            padding-bottom: 80px;
+        }
+
+        @media (min-width: 768px) {
+            .app-content {
+                padding-bottom: 0;
+            }
+        }
+
+        /* Page Header */
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 20px 0;
+            color: white;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(102, 126, 234, 0.25);
+        }
+
+        .page-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .page-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .page-header p {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Categories */
+        .categories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .category-btn {
+            padding: 12px 24px;
+            border-radius: 20px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            background: transparent;
+            color: #667eea;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .category-btn:hover {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: rgba(102, 126, 234, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .category-btn.active {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 14px rgba(240, 147, 251, 0.3);
+        }
+
+        /* Blog Grid */
+        .blogs-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+
+        @media (min-width: 768px) {
+            .blogs-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .blogs-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .blog-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .blog-card:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+            transform: translateY(-5px);
+        }
+
+        .blog-image {
+            position: relative;
+            height: 200px;
+        }
+
+        .blog-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .blog-category {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 12px;
+            box-shadow: 0 4px 14px rgba(102, 126, 234, 0.3);
+        }
+
+        .blog-date {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            color: #1a202c;
+            font-size: 12px;
+        }
+
+        .blog-content {
+            padding: 20px;
+        }
+
+        .blog-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 8px;
+            transition: color 0.3s ease;
+            line-height: 1.4;
+        }
+
+        .blog-card:hover .blog-title {
+            color: #667eea;
+        }
+
+        .blog-author {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .blog-author img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .blog-author span {
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .blog-excerpt {
+            color: #64748b;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .blog-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .blog-tag {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .blog-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .blog-engagement {
+            display: flex;
+            gap: 16px;
+        }
+
+        .blog-stat {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .blog-stat i {
+            color: #667eea;
+        }
+
+        .blog-read-time {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 600;
+        }
+
+        .blog-read-time i {
+            color: #f093fb;
+        }
+
+        /* Featured Blog */
+        .featured-blog {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            color: white;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(102, 126, 234, 0.25);
+        }
+
+        .featured-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .featured-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            align-items: center;
+        }
+
+        @media (min-width: 768px) {
+            .featured-content {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .featured-text h3 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .featured-text p {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .featured-image {
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .featured-image img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        @media (min-width: 768px) {
+            .featured-image img {
+                height: 250px;
+            }
+        }
+
+        /* Mobile Bottom Navigation */
+        .mobile-bottom-nav {
+            display: flex;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid #e2e8f0;
+            z-index: 50;
+            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 12px 0;
+        }
+
+        @media (min-width: 768px) {
+            .mobile-bottom-nav {
+                display: none;
+            }
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #64748b;
+            transition: all 0.3s ease;
+            margin: 0 4px;
+        }
+
+        .nav-item:hover {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .nav-item.active {
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 14px rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .nav-item span {
+            font-size: 12px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <!-- App Header -->
+    <header class="app-header">
+        <div class="container">
+            <div class="app-nav">
+                <!-- Mobile Menu -->
+                <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <!-- Logo -->
+                <div class="logo" onclick="window.location.href='home.html'">
+                    <div class="logo-icon">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <div class="logo-text">
+                        <span class="logo-title">FoodieHive</span>
+                        <div class="logo-subtitle">Culinary Community</div>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <nav class="desktop-nav">
+                    <a href="home.html" class="nav-link">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    <a href="recipes.html" class="nav-link">
+                        <i class="fas fa-utensils"></i>
+                        <span>Recipes</span>
+                    </a>
+                    <a href="blogs.html" class="nav-link active">
+                        <i class="fas fa-pen"></i>
+                        <span>Blogs</span>
+                    </a>
+                    <a href="restaurants.html" class="nav-link">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Restaurants</span>
+                    </a>
+                    <a href="community.html" class="nav-link">
+                        <i class="fas fa-users"></i>
+                        <span>Community</span>
+                    </a>
+                </nav>
+
+                <!-- Search Bar -->
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search blog posts...">
+                </div>
+
+                <!-- Add Recipe Button -->
+                <a href="add-recipe.html" class="btn btn-secondary">
+                    <i class="fas fa-plus"></i>
+                    Add Recipe
+                </a>
+
+                <!-- Profile Dropdown -->
+                <div class="profile-dropdown">
+                    <button class="profile-btn" onclick="toggleProfileMenu()">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face" alt="Profile">
+                    </button>
+                    <div class="dropdown-menu" id="profileMenu">
+                        <a href="profile.html">
+                            <i class="fas fa-user"></i>
+                            Profile
+                        </a>
+                        <a href="my-recipes.html">
+                            <i class="fas fa-utensils"></i>
+                            My Recipes
+                        </a>
+                        <a href="settings.html">
+                            <i class="fas fa-cog"></i>
+                            Settings
+                        </a>
+                        <hr>
+                        <a href="index.html">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" id="mobileMenu">
+            <nav class="mobile-nav">
+                <a href="home.html" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
+                <a href="recipes.html" class="nav-link">
+                    <i class="fas fa-utensils"></i>
+                    <span>Recipes</span>
+                </a>
+                <a href="blogs.html" class="nav-link active">
+                    <i class="fas fa-pen"></i>
+                    <span>Blogs</span>
+                </a>
+                <a href="restaurants.html" class="nav-link">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Restaurants</span>
+                </a>
+                <a href="community.html" class="nav-link">
+                    <i class="fas fa-users"></i>
+                    <span>Community</span>
+                </a>
+                <a href="add-recipe.html" class="nav-link add-recipe">
+                    <i class="fas fa-plus"></i>
+                    <span>Add Recipe</span>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- App Content -->
+    <main class="app-content">
+        <div class="container">
+            <div class="page-header">
+                <div class="page-title">
+                    <i class="fas fa-book animate-float"></i>
+                    <h1>Food Blogs</h1>
+                    <i class="fas fa-pen animate-float"></i>
+                </div>
+                <p>Discover culinary stories and cooking tips from our community</p>
+            </div>
+
+            <!-- Featured Blog -->
+            <div class="featured-blog">
+                <div class="featured-title">
+                    <i class="fas fa-star"></i>
+                    Featured Article
+                </div>
+                <div class="featured-content">
+                    <div class="featured-text">
+                        <h3>The Art of Fermentation</h3>
+                        <p>Discover the ancient art of fermentation and how it can transform your cooking. From kimchi to kombucha, learn the science behind these flavorful transformations.</p>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-eye"></i>
+                            Read Article
+                        </button>
+                    </div>
+                    <div class="featured-image">
+                        <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=250&fit=crop" alt="Fermentation">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories -->
+            <div class="categories">
+                <button class="category-btn active" onclick="filterBlogs('All', this)">All Posts</button>
+                <button class="category-btn" onclick="filterBlogs('Cooking Tips', this)">Cooking Tips</button>
+                <button class="category-btn" onclick="filterBlogs('Nutrition', this)">Nutrition</button>
+                <button class="category-btn" onclick="filterBlogs('Culture', this)">Food Culture</button>
+                <button class="category-btn" onclick="filterBlogs('Reviews', this)">Reviews</button>
+                <button class="category-btn" onclick="filterBlogs('Stories', this)">Stories</button>
+            </div>
+
+            <!-- Blog Grid -->
+            <div class="blogs-grid" id="blogsGrid">
+                <!-- Blogs will be populated by JavaScript -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav">
+        <a href="home.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="recipes.html" class="nav-item">
+            <i class="fas fa-utensils"></i>
+            <span>Recipes</span>
+        </a>
+        <a href="blogs.html" class="nav-item active">
+            <i class="fas fa-pen"></i>
+            <span>Blogs</span>
+        </a>
+        <a href="restaurants.html" class="nav-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>Restaurants</span>
+        </a>
+        <a href="community.html" class="nav-item">
+            <i class="fas fa-users"></i>
+            <span>Community</span>
+        </a>
+    </nav>
+
+    <script>
+        const blogs = [
+            {
+                id: 1,
+                title: "10 Essential Knife Skills Every Home Cook Should Master",
+                author: "Chef Maria Rodriguez",
+                authorImage: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=24&h=24&fit=crop&crop=face",
+                image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=200&fit=crop",
+                category: "Cooking Tips",
+                date: "Dec 15",
+                readTime: "8 min",
+                likes: 234,
+                comments: 18,
+                excerpt: "Master these fundamental knife techniques to improve your cooking efficiency and safety in the kitchen.",
+                tags: ["Techniques", "Basics", "Safety"]
+            },
+            {
+                id: 2,
+                title: "The Mediterranean Diet: A Journey Through Flavor and Health",
+                author: "Dr. Elena Costa",
+                authorImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=24&h=24&fit=crop&crop=face",
+                image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=200&fit=crop",
+                category: "Nutrition",
+                date: "Dec 12",
+                readTime: "12 min",
+                likes: 189,
+                comments: 24,
+                excerpt: "Explore the health benefits and delicious flavors of the Mediterranean diet with practical tips for everyday cooking.",
+                tags: ["Health", "Mediterranean", "Lifestyle"]
+            },
+            {
+                id: 3,
+                title: "Street Food Adventures: Bangkok's Hidden Culinary Gems",
+                author: "Travel Foodie",
+                authorImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=24&h=24&fit=crop&crop=face",
+                image: "https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=400&h=200&fit=crop",
+                category: "Culture",
+                date: "Dec 10",
+                readTime: "15 min",
+                likes: 456,
+                comments: 67,
+                excerpt: "Discover the vibrant street food scene of Bangkok through the eyes of a local food enthusiast.",
+                tags: ["Travel", "Street Food", "Thai"]
+            },
+            {
+                id: 4,
+                title: "Sourdough Starter: Your Gateway to Artisan Bread",
+                author: "Baker John",
+                authorImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=24&h=24&fit=crop&crop=face",
+                image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=200&fit=crop",
+                category: "Cooking Tips",
+                date: "Dec 8",
+                readTime: "10 min",
+                likes: 298,
+                comments: 31,
+                excerpt: "Learn how to create and maintain a sourdough starter for delicious homemade bread.",
+                tags: ["Baking", "Bread", "Fermentation"]
+            },
+            {
+                id: 5,
+                title: "Farm-to-Table: Building Relationships with Local Producers",
+                author: "Sarah Green",
+                authorImage: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=24&h=24&fit=crop&crop=face",
+                image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&h=200&fit=crop",
+                category: "Stories",
+                date: "Dec 5",
+                readTime: "7 min",
+                likes: 367,
+                comments: 45,
+                excerpt: "The importance of supporting local farmers and how it enhances both flavor and community.",
+                tags: ["Local", "Sustainability", "Community"]
+            },
+            {
+                id: 6,
+                title: "Spice Route: Understanding Global Flavor Profiles",
+                author: "Spice Master",
+                authorImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=24&h=24&fit=crop&crop=face",
+                image: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=200&fit=crop",
+                category: "Culture",
+                date: "Dec 3",
+                readTime: "11 min",
+                likes: 445,
+                comments: 52,
+                excerpt: "Journey through different cuisines and learn how spices define regional cooking styles.",
+                tags: ["Spices", "Global", "Flavors"]
+            }
+        ];
+
+        function loadBlogs(blogsToShow = blogs) {
+            const blogsGrid = document.getElementById("blogsGrid");
+            blogsGrid.innerHTML = blogsToShow
+                .map(
+                    (blog) => `
+                    <div class="blog-card" onclick="viewBlog(${blog.id})">
+                        <div class="blog-image">
+                            <img src="${blog.image}" alt="${blog.title}">
+                            <div class="blog-category">${blog.category}</div>
+                            <div class="blog-date">${blog.date}</div>
+                        </div>
+                        <div class="blog-content">
+                            <h3 class="blog-title">${blog.title}</h3>
+                            <div class="blog-author">
+                                <img src="${blog.authorImage}" alt="${blog.author}">
+                                <span>by ${blog.author}</span>
+                            </div>
+                            <p class="blog-excerpt">${blog.excerpt}</p>
+                            <div class="blog-tags">
+                                ${blog.tags.map(tag => `<span class="blog-tag">${tag}</span>`).join('')}
+                            </div>
+                            <div class="blog-stats">
+                                <div class="blog-engagement">
+                                    <div class="blog-stat">
+                                        <i class="fas fa-heart"></i>
+                                        <span>${blog.likes}</span>
+                                    </div>
+                                    <div class="blog-stat">
+                                        <i class="fas fa-comment"></i>
+                                        <span>${blog.comments}</span>
+                                    </div>
+                                </div>
+                                <div class="blog-read-time">
+                                    <i class="fas fa-clock"></i>
+                                    <span>${blog.readTime} read</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+                )
+                .join("");
+        }
+
+        function filterBlogs(category, button) {
+            // Update active category button
+            document.querySelectorAll(".category-btn").forEach((btn) => {
+                btn.classList.remove("active");
+            });
+            button.classList.add("active");
+
+            // Filter and display blogs
+            const filteredBlogs = category === "All" ? blogs : blogs.filter((blog) => blog.category === category);
+            loadBlogs(filteredBlogs);
+        }
+
+        function viewBlog(id) {
+            alert(`Viewing blog ${id} - Blog detail page coming soon!`);
+        }
+
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById("mobileMenu");
+            mobileMenu.classList.toggle("show");
+        }
+
+        function toggleProfileMenu() {
+            const profileMenu = document.getElementById("profileMenu");
+            profileMenu.classList.toggle("show");
+        }
+
+        // Close menus when clicking outside
+        document.addEventListener("click", (event) => {
+            const mobileMenu = document.getElementById("mobileMenu");
+            const profileMenu = document.getElementById("profileMenu");
+            const mobileMenuBtn = document.querySelector(".mobile-menu-btn");
+            const profileBtn = document.querySelector(".profile-btn");
+
+            if (!mobileMenuBtn.contains(event.target) && !mobileMenu.contains(event.target)) {
+                mobileMenu.classList.remove("show");
+            }
+
+            if (!profileBtn.contains(event.target) && !profileMenu.contains(event.target)) {
+                profileMenu.classList.remove("show");
+            }
+        });
+
+        // Initialize blogs on page load
+        document.addEventListener("DOMContentLoaded", () => {
+            loadBlogs();
+        });
+    </script>
+</body>
+</html>
