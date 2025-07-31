@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings - FoodieHive</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Add Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -438,6 +442,13 @@
             background: white;
         }
 
+        .form-group input:disabled,
+        .form-group textarea:disabled {
+            background-color: #f8fafc;
+            color: #64748b;
+            cursor: not-allowed;
+        }
+
         .form-group input:focus,
         .form-group textarea:focus,
         .form-group select:focus {
@@ -603,6 +614,34 @@
             font-size: 12px;
             font-weight: 600;
         }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.error {
+            background: #f44336;
+        }
     </style>
 </head>
 <body>
@@ -681,7 +720,7 @@
                             Settings
                         </a>
                         <hr>
-                        <a href="index.html">
+                        <a href="#" onclick="logout()">
                             <i class="fas fa-sign-out-alt"></i>
                             Logout
                         </a>
@@ -741,28 +780,28 @@
                         <i class="fas fa-user"></i>
                         Profile Information
                     </h2>
-                    <form>
+                    <form id="profileForm">
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="firstName">First Name</label>
-                                <input type="text" id="firstName" value="Alex" required>
+                                <input type="text" id="firstName" required>
                             </div>
                             <div class="form-group">
                                 <label for="lastName">Last Name</label>
-                                <input type="text" id="lastName" value="Johnson" required>
+                                <input type="text" id="lastName" required>
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="username">Username</label>
-                            <input type="text" id="username" value="alexjohnson" required>
+                            <input type="text" id="username" disabled>
                         </div>
                         <div class="form-group">
                             <label for="email">Email</label>
-                            <input type="email" id="email" value="alex@example.com" required>
+                            <input type="email" id="email" disabled>
                         </div>
                         <div class="form-group">
                             <label for="bio">Bio</label>
-                            <textarea id="bio" placeholder="Tell us about yourself...">Passionate chef with 10+ years of experience creating innovative dishes that blend traditional techniques with modern flavors.</textarea>
+                            <textarea id="bio" placeholder="Tell us about yourself..."></textarea>
                         </div>
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-save"></i>
@@ -783,7 +822,7 @@
                             <p>Make your profile visible to other users</p>
                         </div>
                         <label class="toggle-switch">
-                            <input type="checkbox" checked>
+                            <input type="checkbox" id="profileVisibility">
                             <span class="slider"></span>
                         </label>
                     </div>
@@ -793,7 +832,7 @@
                             <p>Display your email address on your profile</p>
                         </div>
                         <label class="toggle-switch">
-                            <input type="checkbox">
+                            <input type="checkbox" id="showEmail">
                             <span class="slider"></span>
                         </label>
                     </div>
@@ -803,7 +842,7 @@
                             <p>Allow others to comment on your recipes</p>
                         </div>
                         <label class="toggle-switch">
-                            <input type="checkbox" checked>
+                            <input type="checkbox" id="recipeComments">
                             <span class="slider"></span>
                         </label>
                     </div>
@@ -812,7 +851,7 @@
                             <h4>Two-Factor Authentication</h4>
                             <p>Add an extra layer of security to your account</p>
                         </div>
-                        <button class="btn btn-outline">Enable 2FA</button>
+                        <button class="btn btn-outline" id="enable2fa">Enable 2FA</button>
                     </div>
                 </div>
 
@@ -828,7 +867,7 @@
                             <p>Receive notifications via email</p>
                         </div>
                         <label class="toggle-switch">
-                            <input type="checkbox" checked>
+                            <input type="checkbox" id="emailNotifications">
                             <span class="slider"></span>
                         </label>
                     </div>
@@ -838,7 +877,7 @@
                             <p>Get notified when someone likes your recipe</p>
                         </div>
                         <label class="toggle-switch">
-                            <input type="checkbox" checked>
+                            <input type="checkbox" id="recipeLikes">
                             <span class="slider"></span>
                         </label>
                     </div>
@@ -848,7 +887,7 @@
                             <p>Get notified when someone follows you</p>
                         </div>
                         <label class="toggle-switch">
-                            <input type="checkbox" checked>
+                            <input type="checkbox" id="newFollowers">
                             <span class="slider"></span>
                         </label>
                     </div>
@@ -858,7 +897,7 @@
                             <p>Get notified when someone comments on your recipe</p>
                         </div>
                         <label class="toggle-switch">
-                            <input type="checkbox" checked>
+                            <input type="checkbox" id="commentNotifications">
                             <span class="slider"></span>
                         </label>
                     </div>
@@ -868,7 +907,7 @@
                             <p>Receive a weekly summary of your activity</p>
                         </div>
                         <label class="toggle-switch">
-                            <input type="checkbox">
+                            <input type="checkbox" id="weeklyDigest">
                             <span class="slider"></span>
                         </label>
                     </div>
@@ -894,7 +933,7 @@
                             <input type="password" id="confirmPassword" placeholder="Confirm new password">
                         </div>
                     </div>
-                    <button type="button" class="btn btn-primary">
+                    <button type="button" class="btn btn-primary" id="updatePasswordBtn">
                         <i class="fas fa-lock"></i>
                         Update Password
                     </button>
@@ -911,14 +950,14 @@
                             <h4>Deactivate Account</h4>
                             <p>Temporarily disable your account. You can reactivate it anytime.</p>
                         </div>
-                        <button class="btn btn-outline">Deactivate</button>
+                        <button class="btn btn-outline" id="deactivateAccount">Deactivate</button>
                     </div>
                     <div class="setting-item">
                         <div class="setting-info">
                             <h4>Delete Account</h4>
                             <p>Permanently delete your account and all associated data. This action cannot be undone.</p>
                         </div>
-                        <button class="btn btn-danger">Delete Account</button>
+                        <button class="btn btn-danger" id="deleteAccount">Delete Account</button>
                     </div>
                 </div>
             </div>
@@ -949,12 +988,297 @@
         </a>
     </nav>
 
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Settings saved successfully!</span>
+    </div>
+
     <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyA3RPDDpIbLUdPRkJpHtkqap7VwxxApwgk",
+            authDomain: "foodiehive-a6f18.firebaseapp.com",
+            projectId: "foodiehive-a6f18",
+            storageBucket: "foodiehive-a6f18.firebasestorage.app",
+            messagingSenderId: "1004100513391",
+            appId: "1:1004100513391:web:650ee3533bf8b5e289e79a",
+            measurementId: "G-P071E6HP43"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // Current user data
+        let currentUser = null;
+        let userSettings = {};
+
+        // DOM elements
+        const profileForm = document.getElementById('profileForm');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if user is logged in
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    currentUser = user;
+                    loadUserSettings();
+                } else {
+                    // Redirect to login if not authenticated
+                    window.location.href = 'index.html';
+                }
+            });
+
+            // Form submission
+            profileForm.addEventListener('submit', saveProfileSettings);
+
+            // Toggle switches event listeners
+            document.querySelectorAll('.toggle-switch input').forEach(switchEl => {
+                switchEl.addEventListener('change', saveToggleSettings);
+            });
+
+            // Password update
+            document.getElementById('updatePasswordBtn').addEventListener('click', updatePassword);
+
+            // Account actions
+            document.getElementById('deactivateAccount').addEventListener('click', deactivateAccount);
+            document.getElementById('deleteAccount').addEventListener('click', deleteAccount);
+            document.getElementById('enable2fa').addEventListener('click', enableTwoFactorAuth);
+        });
+
+        // Load user settings from Firestore
+        async function loadUserSettings() {
+            try {
+                const doc = await db.collection('users').doc(currentUser.uid).get();
+                
+                if (doc.exists) {
+                    userSettings = doc.data();
+                    populateFormFields();
+                } else {
+                    // Create default settings for new user
+                    userSettings = {
+                        firstName: '',
+                        lastName: '',
+                        username: currentUser.email.split('@')[0] || '',
+                        email: currentUser.email || '',
+                        bio: '',
+                        profileVisibility: true,
+                        showEmail: false,
+                        recipeComments: true,
+                        twoFactorAuth: false,
+                        emailNotifications: true,
+                        recipeLikes: true,
+                        newFollowers: true,
+                        commentNotifications: true,
+                        weeklyDigest: false,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+                    
+                    await db.collection('users').doc(currentUser.uid).set(userSettings);
+                    populateFormFields();
+                }
+            } catch (error) {
+                showToast('Error loading settings: ' + error.message, true);
+                console.error('Error loading settings:', error);
+            }
+        }
+
+        // Populate form fields with user settings
+        function populateFormFields() {
+            document.getElementById('firstName').value = userSettings.firstName || '';
+            document.getElementById('lastName').value = userSettings.lastName || '';
+            document.getElementById('username').value = userSettings.username || '';
+            document.getElementById('email').value = userSettings.email || '';
+            document.getElementById('bio').value = userSettings.bio || '';
+            
+            // Set toggle switches
+            document.getElementById('profileVisibility').checked = userSettings.profileVisibility || false;
+            document.getElementById('showEmail').checked = userSettings.showEmail || false;
+            document.getElementById('recipeComments').checked = userSettings.recipeComments || false;
+            document.getElementById('emailNotifications').checked = userSettings.emailNotifications || false;
+            document.getElementById('recipeLikes').checked = userSettings.recipeLikes || false;
+            document.getElementById('newFollowers').checked = userSettings.newFollowers || false;
+            document.getElementById('commentNotifications').checked = userSettings.commentNotifications || false;
+            document.getElementById('weeklyDigest').checked = userSettings.weeklyDigest || false;
+        }
+
+        // Save profile settings
+        async function saveProfileSettings(e) {
+            e.preventDefault();
+            
+            try {
+                // Update only editable fields in userSettings object
+                userSettings.firstName = document.getElementById('firstName').value;
+                userSettings.lastName = document.getElementById('lastName').value;
+                userSettings.bio = document.getElementById('bio').value;
+                
+                // Update in Firestore
+                await db.collection('users').doc(currentUser.uid).update({
+                    firstName: userSettings.firstName,
+                    lastName: userSettings.lastName,
+                    bio: userSettings.bio
+                });
+                
+                showToast('Profile settings saved successfully!');
+            } catch (error) {
+                showToast('Error saving profile: ' + error.message, true);
+                console.error('Error saving profile:', error);
+            }
+        }
+
+        // Save toggle settings
+        async function saveToggleSettings() {
+            try {
+                // Update userSettings object
+                userSettings.profileVisibility = document.getElementById('profileVisibility').checked;
+                userSettings.showEmail = document.getElementById('showEmail').checked;
+                userSettings.recipeComments = document.getElementById('recipeComments').checked;
+                userSettings.emailNotifications = document.getElementById('emailNotifications').checked;
+                userSettings.recipeLikes = document.getElementById('recipeLikes').checked;
+                userSettings.newFollowers = document.getElementById('newFollowers').checked;
+                userSettings.commentNotifications = document.getElementById('commentNotifications').checked;
+                userSettings.weeklyDigest = document.getElementById('weeklyDigest').checked;
+                
+                // Update in Firestore
+                await db.collection('users').doc(currentUser.uid).update({
+                    profileVisibility: userSettings.profileVisibility,
+                    showEmail: userSettings.showEmail,
+                    recipeComments: userSettings.recipeComments,
+                    emailNotifications: userSettings.emailNotifications,
+                    recipeLikes: userSettings.recipeLikes,
+                    newFollowers: userSettings.newFollowers,
+                    commentNotifications: userSettings.commentNotifications,
+                    weeklyDigest: userSettings.weeklyDigest
+                });
+                
+                showToast('Settings updated successfully!');
+            } catch (error) {
+                showToast('Error saving settings: ' + error.message, true);
+                console.error('Error saving settings:', error);
+            }
+        }
+
+        // Update password
+        async function updatePassword() {
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                showToast('Please fill in all password fields', true);
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showToast('New passwords do not match', true);
+                return;
+            }
+            
+            try {
+                // Reauthenticate user
+                const credential = firebase.auth.EmailAuthProvider.credential(
+                    currentUser.email, 
+                    currentPassword
+                );
+                
+                await currentUser.reauthenticateWithCredential(credential);
+                
+                // Update password
+                await currentUser.updatePassword(newPassword);
+                
+                // Clear password fields
+                document.getElementById('currentPassword').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmPassword').value = '';
+                
+                showToast('Password updated successfully!');
+            } catch (error) {
+                showToast('Error updating password: ' + error.message, true);
+                console.error('Error updating password:', error);
+            }
+        }
+
+        // Enable two-factor authentication
+        async function enableTwoFactorAuth() {
+            showToast('Two-factor authentication is not yet implemented', true);
+            // In a real app, you would implement 2FA here
+        }
+
+        // Deactivate account
+        async function deactivateAccount() {
+            if (confirm('Are you sure you want to deactivate your account? You can reactivate it by logging in again.')) {
+                try {
+                    await db.collection('users').doc(currentUser.uid).update({
+                        active: false,
+                        deactivatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    await auth.signOut();
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    showToast('Error deactivating account: ' + error.message, true);
+                    console.error('Error deactivating account:', error);
+                }
+            }
+        }
+
+        // Delete account
+        async function deleteAccount() {
+            if (confirm('Are you sure you want to permanently delete your account? This action cannot be undone.')) {
+                try {
+                    // Delete user data from Firestore
+                    await db.collection('users').doc(currentUser.uid).delete();
+                    
+                    // Delete user from Firebase Auth
+                    await currentUser.delete();
+                    
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    showToast('Error deleting account: ' + error.message, true);
+                    console.error('Error deleting account:', error);
+                }
+            }
+        }
+
+        // Logout
+        async function logout() {
+            try {
+                await auth.signOut();
+                window.location.href = 'index.html';
+            } catch (error) {
+                showToast('Error logging out: ' + error.message, true);
+                console.error('Error logging out:', error);
+            }
+        }
+
+        // Show toast notification
+        function showToast(message, isError = false) {
+            toastMessage.textContent = message;
+            
+            if (isError) {
+                toast.classList.add('error');
+            } else {
+                toast.classList.remove('error');
+            }
+            
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Toggle mobile menu
         function toggleMobileMenu() {
             const mobileMenu = document.getElementById("mobileMenu");
             mobileMenu.classList.toggle("show");
         }
 
+        // Toggle profile menu
         function toggleProfileMenu() {
             const profileMenu = document.getElementById("profileMenu");
             profileMenu.classList.toggle("show");
