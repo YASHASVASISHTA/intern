@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recipes - FoodieHive</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Add Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -568,69 +572,137 @@
             color: #f59e0b;
         }
 
-        /* Featured Recipe */
-        .featured-recipe {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        /* Recipe Detail View */
+        .recipe-detail {
+            display: none;
+            background: white;
             border-radius: 20px;
             padding: 30px;
-            margin-bottom: 30px;
-            color: white;
-            text-align: center;
-            box-shadow: 0 20px 25px -5px rgba(102, 126, 234, 0.25);
+            margin: 20px 0;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
-        .featured-title {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 16px;
+        .recipe-detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            color: #64748b;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .recipe-detail-image {
+            width: 100%;
+            height: 300px;
+            border-radius: 16px;
+            object-fit: cover;
+            margin-bottom: 20px;
+        }
+
+        .recipe-detail-title {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .recipe-detail-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .recipe-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #64748b;
+        }
+
+        .recipe-meta-item i {
+            color: #667eea;
+        }
+
+        .recipe-section {
+            margin-bottom: 30px;
+        }
+
+        .recipe-section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            align-items: center;
             gap: 12px;
         }
 
-        .featured-content {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 30px;
-            align-items: center;
+        .ingredients-list, .instructions-list {
+            list-style-type: none;
         }
 
-        @media (min-width: 768px) {
-            .featured-content {
-                grid-template-columns: 1fr 1fr;
-            }
+        .ingredient-item, .instruction-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            background: #f8fafc;
         }
 
-        .featured-text h3 {
-            font-size: 28px;
+        .instruction-item {
+            align-items: flex-start;
+        }
+
+        .instruction-number {
             font-weight: 700;
-            margin-bottom: 16px;
+            color: #667eea;
+            min-width: 24px;
         }
 
-        .featured-text p {
-            font-size: 18px;
-            color: rgba(255, 255, 255, 0.9);
-            margin-bottom: 20px;
-            line-height: 1.6;
+        /* Loading State */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
         }
 
-        .featured-image {
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(102, 126, 234, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #667eea;
+            animation: spin 1s linear infinite;
         }
 
-        .featured-image img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-
-        @media (min-width: 768px) {
-            .featured-image img {
-                height: 250px;
-            }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         /* Mobile Bottom Navigation */
@@ -809,49 +881,73 @@
     <!-- App Content -->
     <main class="app-content">
         <div class="container">
-            <div class="page-header">
-                <div class="page-title">
-                    <i class="fas fa-utensils animate-float"></i>
-                    <h1>Recipes</h1>
-                    <i class="fas fa-heart animate-float"></i>
-                </div>
-                <p>Discover delicious recipes from our community</p>
-            </div>
-
-            <!-- Featured Recipe -->
-            <div class="featured-recipe">
-                <div class="featured-title">
-                    <i class="fas fa-star"></i>
-                    Recipe of the Day
-                </div>
-                <div class="featured-content">
-                    <div class="featured-text">
-                        <h3>Rainbow Buddha Bowl</h3>
-                        <p>A vibrant and nutritious bowl packed with fresh vegetables, quinoa, and a delicious tahini dressing. Perfect for a healthy lunch or dinner!</p>
-                        <button class="btn btn-secondary">
-                            <i class="fas fa-eye"></i>
-                            View Recipe
-                        </button>
+            <!-- Recipe List View -->
+            <div id="recipeListView">
+                <div class="page-header">
+                    <div class="page-title">
+                        <i class="fas fa-utensils animate-float"></i>
+                        <h1>Recipes</h1>
+                        <i class="fas fa-heart animate-float"></i>
                     </div>
-                    <div class="featured-image">
-                        <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=250&fit=crop" alt="Rainbow Buddha Bowl">
+                    <p>Discover delicious recipes from our community</p>
+                </div>
+
+                <!-- Categories -->
+                <div class="categories">
+                    <button class="category-btn active" onclick="filterRecipes('All', this)">All Recipes</button>
+                    <button class="category-btn" onclick="filterRecipes('Breakfast', this)">Breakfast</button>
+                    <button class="category-btn" onclick="filterRecipes('Lunch', this)">Lunch</button>
+                    <button class="category-btn" onclick="filterRecipes('Dinner', this)">Dinner</button>
+                    <button class="category-btn" onclick="filterRecipes('Dessert', this)">Dessert</button>
+                    <button class="category-btn" onclick="filterRecipes('Vegetarian', this)">Vegetarian</button>
+                </div>
+
+                <!-- Recipe Grid -->
+                <div class="recipes-grid" id="recipesGrid">
+                    <div class="loading">
+                        <div class="spinner"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Categories -->
-            <div class="categories">
-                <button class="category-btn active" onclick="filterRecipes('All', this)">All Recipes</button>
-                <button class="category-btn" onclick="filterRecipes('Breakfast', this)">Breakfast</button>
-                <button class="category-btn" onclick="filterRecipes('Lunch', this)">Lunch</button>
-                <button class="category-btn" onclick="filterRecipes('Dinner', this)">Dinner</button>
-                <button class="category-btn" onclick="filterRecipes('Dessert', this)">Dessert</button>
-                <button class="category-btn" onclick="filterRecipes('Vegetarian', this)">Vegetarian</button>
-            </div>
+            <!-- Recipe Detail View -->
+            <div id="recipeDetailView" class="recipe-detail">
+                <div class="recipe-detail-header">
+                    <button class="back-btn" onclick="showRecipeList()">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to Recipes
+                    </button>
+                </div>
 
-            <!-- Recipe Grid -->
-            <div class="recipes-grid" id="recipesGrid">
-                <!-- Recipes will be populated by JavaScript -->
+                <img id="detailRecipeImage" class="recipe-detail-image" src="" alt="Recipe Image">
+                
+                <h1 id="detailRecipeTitle" class="recipe-detail-title"></h1>
+                
+                <div id="detailRecipeMeta" class="recipe-detail-meta">
+                    <!-- Meta items will be added here -->
+                </div>
+                
+                <p id="detailRecipeDescription" class="recipe-description"></p>
+                
+                <div class="recipe-section">
+                    <h3 class="recipe-section-title">
+                        <i class="fas fa-list"></i>
+                        Ingredients
+                    </h3>
+                    <ul id="detailRecipeIngredients" class="ingredients-list">
+                        <!-- Ingredients will be added here -->
+                    </ul>
+                </div>
+                
+                <div class="recipe-section">
+                    <h3 class="recipe-section-title">
+                        <i class="fas fa-list-ol"></i>
+                        Instructions
+                    </h3>
+                    <ol id="detailRecipeInstructions" class="instructions-list">
+                        <!-- Instructions will be added here -->
+                    </ol>
+                </div>
             </div>
         </div>
     </main>
@@ -881,144 +977,239 @@
     </nav>
 
     <script>
-        const recipes = [
-            {
-                id: 1,
-                title: "Spicy Seafood Pasta",
-                author: "Maria Rodriguez",
-                authorImage: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=24&h=24&fit=crop&crop=face",
-                image: "https://images.unsplash.com/photo-1621996346565-e3dbc353d2e5?w=400&h=200&fit=crop",
-                category: "Dinner",
-                difficulty: "medium",
-                time: "45 min",
-                rating: 4.8,
-                likes: 234,
-                comments: 18,
-                description: "A delicious seafood pasta with a spicy kick, perfect for dinner parties.",
-                tags: ["Seafood", "Pasta", "Spicy"]
-            },
-            {
-                id: 2,
-                title: "Avocado Toast Supreme",
-                author: "Alex Johnson",
-                authorImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=24&h=24&fit=crop&crop=face",
-                image: "https://images.unsplash.com/photo-1541519227354-08fa5d50c44d?w=400&h=200&fit=crop",
-                category: "Breakfast",
-                difficulty: "easy",
-                time: "10 min",
-                rating: 4.6,
-                likes: 189,
-                comments: 24,
-                description: "Elevated avocado toast with poached egg and everything seasoning.",
-                tags: ["Healthy", "Quick", "Vegetarian"]
-            },
-            {
-                id: 3,
-                title: "Chocolate Lava Cake",
-                author: "Sarah Chen",
-                authorImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=24&h=24&fit=crop&crop=face",
-                image: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400&h=200&fit=crop",
-                category: "Dessert",
-                difficulty: "hard",
-                time: "60 min",
-                rating: 4.9,
-                likes: 456,
-                comments: 67,
-                description: "Rich and decadent chocolate lava cake with a molten center.",
-                tags: ["Chocolate", "Dessert", "Indulgent"]
-            },
-            {
-                id: 4,
-                title: "Mediterranean Quinoa Bowl",
-                author: "David Kim",
-                authorImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=24&h=24&fit=crop&crop=face",
-                image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=200&fit=crop",
-                category: "Lunch",
-                difficulty: "easy",
-                time: "25 min",
-                rating: 4.7,
-                likes: 298,
-                comments: 31,
-                description: "Fresh and healthy Mediterranean bowl with quinoa, vegetables, and feta.",
-                tags: ["Healthy", "Mediterranean", "Vegetarian"]
-            },
-            {
-                id: 5,
-                title: "Classic Pancakes",
-                author: "Emma Wilson",
-                authorImage: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=24&h=24&fit=crop&crop=face",
-                image: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&h=200&fit=crop",
-                category: "Breakfast",
-                difficulty: "easy",
-                time: "20 min",
-                rating: 4.5,
-                likes: 367,
-                comments: 45,
-                description: "Fluffy and delicious classic pancakes perfect for weekend mornings.",
-                tags: ["Breakfast", "Classic", "Family"]
-            },
-            {
-                id: 6,
-                title: "Thai Green Curry",
-                author: "James Thompson",
-                authorImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=24&h=24&fit=crop&crop=face",
-                image: "https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=400&h=200&fit=crop",
-                category: "Dinner",
-                difficulty: "medium",
-                time: "40 min",
-                rating: 4.8,
-                likes: 445,
-                comments: 52,
-                description: "Authentic Thai green curry with coconut milk and fresh herbs.",
-                tags: ["Thai", "Curry", "Spicy"]
-            }
-        ];
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyA3RPDDpIbLUdPRkJpHtkqap7VwxxApwgk",
+            authDomain: "foodiehive-a6f18.firebaseapp.com",
+            projectId: "foodiehive-a6f18",
+            storageBucket: "foodiehive-a6f18.appspot.com",
+            messagingSenderId: "1004100513391",
+            appId: "1:1004100513391:web:650ee3533bf8b5e289e79a",
+            measurementId: "G-P071E6HP43"
+        };
 
-        function loadRecipes(recipesToShow = recipes) {
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // Global variables
+        let allRecipes = [];
+        let currentCategory = 'All';
+
+       async function loadRecipes(category = 'All') {
+    try {
+        const recipesGrid = document.getElementById("recipesGrid");
+        
+        // Show loading state
+        recipesGrid.innerHTML = `
+            <div class="loading">
+                <div class="spinner"></div>
+            </div>
+        `;
+        
+        // Always query all recipes ordered by createdAt
+        const querySnapshot = await db.collection("recipes")
+            .orderBy("createdAt", "desc")
+            .get();
+        
+        allRecipes = [];
+        querySnapshot.forEach((doc) => {
+            const recipeData = doc.data();
+            recipeData.id = doc.id;
+            allRecipes.push(recipeData);
+        });
+        
+        // Filter by category client-side if needed
+        const filteredRecipes = category === 'All' 
+            ? allRecipes 
+            : allRecipes.filter(recipe => recipe.category === category);
+        
+        // Display recipes
+        displayRecipes(filteredRecipes);
+    } catch (error) {
+        console.error("Error loading recipes: ", error);
+        const recipesGrid = document.getElementById("recipesGrid");
+        recipesGrid.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #ef4444;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px;"></i>
+                <h3>Failed to load recipes</h3>
+                <p>Please try again later</p>
+            </div>
+        `;
+    }
+
+            try {
+                const recipesGrid = document.getElementById("recipesGrid");
+                
+                // Show loading state
+                recipesGrid.innerHTML = `
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                `;
+                
+                let query = db.collection("recipes");
+                
+                if (category !== 'All') {
+                    query = query.where("category", "==", category);
+                }
+                
+                const querySnapshot = await query.orderBy("createdAt", "desc").get();
+                
+                allRecipes = [];
+                querySnapshot.forEach((doc) => {
+                    const recipeData = doc.data();
+                    recipeData.id = doc.id;
+                    allRecipes.push(recipeData);
+                });
+                
+                // Display recipes
+                displayRecipes(allRecipes);
+            } catch (error) {
+                console.error("Error loading recipes: ", error);
+                const recipesGrid = document.getElementById("recipesGrid");
+                recipesGrid.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #ef4444;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px;"></i>
+                        <h3>Failed to load recipes</h3>
+                        <p>Please try again later</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayRecipes(recipes) {
             const recipesGrid = document.getElementById("recipesGrid");
-            recipesGrid.innerHTML = recipesToShow
-                .map(
-                    (recipe) => `
-                    <div class="recipe-card" onclick="viewRecipe(${recipe.id})">
-                        <div class="recipe-image">
-                            <img src="${recipe.image}" alt="${recipe.title}">
-                            <div class="recipe-difficulty ${recipe.difficulty}">${recipe.difficulty}</div>
-                            <div class="recipe-time">
-                                <i class="fas fa-clock"></i>
-                                ${recipe.time}
-                            </div>
+            
+            if (recipes.length === 0) {
+                recipesGrid.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #64748b;">
+                        <i class="fas fa-utensils" style="font-size: 48px; margin-bottom: 16px;"></i>
+                        <h3>No recipes found</h3>
+                        <p>Try changing your filters</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            recipesGrid.innerHTML = recipes.map(recipe => `
+                <div class="recipe-card" onclick="showRecipeDetail('${recipe.id}')">
+                    <div class="recipe-image">
+                        <img src="${recipe.imageUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=200&fit=crop'}" alt="${recipe.name}">
+                        <div class="recipe-difficulty ${recipe.difficulty.toLowerCase()}">${recipe.difficulty}</div>
+                        <div class="recipe-time">
+                            <i class="fas fa-clock"></i>
+                            ${recipe.prepTime + recipe.cookTime} min
                         </div>
-                        <div class="recipe-content">
-                            <h3 class="recipe-title">${recipe.title}</h3>
-                            <div class="recipe-author">
-                                <img src="${recipe.authorImage}" alt="${recipe.author}">
-                                <span>by ${recipe.author}</span>
-                            </div>
-                            <p class="recipe-description">${recipe.description}</p>
-                            <div class="recipe-tags">
-                                ${recipe.tags.map(tag => `<span class="recipe-tag">${tag}</span>`).join('')}
-                            </div>
-                            <div class="recipe-stats">
-                                <div class="recipe-engagement">
-                                    <div class="recipe-stat">
-                                        <i class="fas fa-heart"></i>
-                                        <span>${recipe.likes}</span>
-                                    </div>
-                                    <div class="recipe-stat">
-                                        <i class="fas fa-comment"></i>
-                                        <span>${recipe.comments}</span>
-                                    </div>
+                    </div>
+                    <div class="recipe-content">
+                        <h3 class="recipe-title">${recipe.name}</h3>
+                        <div class="recipe-author">
+                            <img src="${recipe.author?.image || 'https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?w=24&h=24&fit=crop&crop=face'}" alt="${recipe.author?.name || 'Anonymous'}">
+                            <span>by ${recipe.author?.name || 'Anonymous'}</span>
+                        </div>
+                        <p class="recipe-description">${recipe.description || 'A delicious recipe from our community'}</p>
+                        <div class="recipe-tags">
+                            ${(recipe.tags || []).slice(0, 3).map(tag => `<span class="recipe-tag">${tag}</span>`).join('')}
+                        </div>
+                        <div class="recipe-stats">
+                            <div class="recipe-engagement">
+                                <div class="recipe-stat">
+                                    <i class="fas fa-heart"></i>
+                                    <span>${recipe.likes || 0}</span>
                                 </div>
-                                <div class="recipe-rating">
-                                    <i class="fas fa-star"></i>
-                                    <span>${recipe.rating}</span>
+                                <div class="recipe-stat">
+                                    <i class="fas fa-comment"></i>
+                                    <span>${recipe.comments?.length || 0}</span>
                                 </div>
+                            </div>
+                            <div class="recipe-rating">
+                                <i class="fas fa-star"></i>
+                                <span>${recipe.rating || 0}</span>
                             </div>
                         </div>
                     </div>
-                `
-                )
-                .join("");
+                </div>
+            `).join('');
+        }
+
+        async function showRecipeDetail(recipeId) {
+            try {
+                // Show loading state
+                document.getElementById("recipeDetailView").style.display = 'block';
+                document.getElementById("recipeListView").style.display = 'none';
+                
+                // Get recipe from our cached list or fetch fresh if needed
+                let recipe = allRecipes.find(r => r.id === recipeId);
+                if (!recipe) {
+                    const doc = await db.collection("recipes").doc(recipeId).get();
+                    if (doc.exists) {
+                        recipe = doc.data();
+                        recipe.id = doc.id;
+                    } else {
+                        throw new Error("Recipe not found");
+                    }
+                }
+                
+                // Populate detail view
+                document.getElementById("detailRecipeImage").src = recipe.imageUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&fit=crop';
+                document.getElementById("detailRecipeTitle").textContent = recipe.name;
+                document.getElementById("detailRecipeDescription").textContent = recipe.description || 'A delicious recipe from our community';
+                
+                // Populate meta info
+                const metaContainer = document.getElementById("detailRecipeMeta");
+                metaContainer.innerHTML = `
+                    <div class="recipe-meta-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Prep: ${recipe.prepTime} min</span>
+                    </div>
+                    <div class="recipe-meta-item">
+                        <i class="fas fa-fire"></i>
+                        <span>Cook: ${recipe.cookTime} min</span>
+                    </div>
+                    <div class="recipe-meta-item">
+                        <i class="fas fa-users"></i>
+                        <span>Servings: ${recipe.servings}</span>
+                    </div>
+                    <div class="recipe-meta-item">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Difficulty: ${recipe.difficulty}</span>
+                    </div>
+                    <div class="recipe-meta-item">
+                        <i class="fas fa-star"></i>
+                        <span>Rating: ${recipe.rating || 0}/5</span>
+                    </div>
+                `;
+                
+                // Populate ingredients
+                const ingredientsContainer = document.getElementById("detailRecipeIngredients");
+                ingredientsContainer.innerHTML = (recipe.ingredients || []).map(ingredient => `
+                    <li class="ingredient-item">
+                        <i class="fas fa-circle" style="font-size: 8px; color: #667eea; margin-top: 7px;"></i>
+                        <span>${ingredient}</span>
+                    </li>
+                `).join('');
+                
+                // Populate instructions
+                const instructionsContainer = document.getElementById("detailRecipeInstructions");
+                instructionsContainer.innerHTML = (recipe.instructions || []).map((instruction, index) => `
+                    <li class="instruction-item">
+                        <span class="instruction-number">${index + 1}.</span>
+                        <span>${instruction}</span>
+                    </li>
+                `).join('');
+                
+            } catch (error) {
+                console.error("Error loading recipe details: ", error);
+                alert("Failed to load recipe details. Please try again.");
+                showRecipeList();
+            }
+        }
+
+        function showRecipeList() {
+            document.getElementById("recipeDetailView").style.display = 'none';
+            document.getElementById("recipeListView").style.display = 'block';
         }
 
         function filterRecipes(category, button) {
@@ -1028,13 +1219,8 @@
             });
             button.classList.add("active");
 
-            // Filter and display recipes
-            const filteredRecipes = category === "All" ? recipes : recipes.filter((recipe) => recipe.category === category || recipe.tags.includes(category));
-            loadRecipes(filteredRecipes);
-        }
-
-        function viewRecipe(id) {
-            alert(`Viewing recipe ${id} - Recipe detail page coming soon!`);
+            currentCategory = category;
+            loadRecipes(category);
         }
 
         function toggleMobileMenu() {
@@ -1066,6 +1252,13 @@
         // Initialize recipes on page load
         document.addEventListener("DOMContentLoaded", () => {
             loadRecipes();
+            
+            // Check if we're opening a specific recipe from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const recipeId = urlParams.get('id');
+            if (recipeId) {
+                showRecipeDetail(recipeId);
+            }
         });
     </script>
 </body>
