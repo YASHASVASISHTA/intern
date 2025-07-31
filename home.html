@@ -871,11 +871,11 @@
             return `
                 <div class="post-card">
                     <div class="post-header">
-                        <img src="${post.authorAvatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(post.authorName) + '&background=667eea&color=fff'}" 
-                             alt="${post.authorName}" class="post-avatar">
+                        <img src="${post.authorAvatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(post.author) + '&background=667eea&color=fff'}" 
+                             alt="${post.author}" class="post-avatar">
                         <div class="post-author">
                             <div class="author-name">
-                                <span>${post.authorName}</span>
+                                <span>${post.author}</span>
                                 <div class="author-badge ${post.authorType === 'chef' ? 'chef' : 'food-lover'}">
                                     <i class="fas ${post.authorType === 'chef' ? 'fa-hat-chef' : 'fa-heart'}"></i>
                                     ${post.authorType === 'chef' ? 'Chef' : 'Food Lover'}
