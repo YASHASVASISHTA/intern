@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Community - FoodieHive</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -721,6 +725,41 @@
             font-size: 12px;
             font-weight: 600;
         }
+
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Alert messages */
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-success {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .alert-error {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
     </style>
 </head>
 <body>
@@ -783,7 +822,7 @@
                 <!-- Profile Dropdown -->
                 <div class="profile-dropdown">
                     <button class="profile-btn" onclick="toggleProfileMenu()">
-                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face" alt="Profile">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face" alt="Profile" id="profileImage">
                     </button>
                     <div class="dropdown-menu" id="profileMenu">
                         <a href="profile.html">
@@ -799,7 +838,7 @@
                             Settings
                         </a>
                         <hr>
-                        <a href="index.html">
+                        <a href="#" onclick="logout()">
                             <i class="fas fa-sign-out-alt"></i>
                             Logout
                         </a>
@@ -857,34 +896,40 @@
                     <!-- Create Post -->
                     <div class="create-post">
                         <div class="create-post-header">
-                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&h=50&fit=crop&crop=face" alt="Your Profile">
-                            <textarea class="create-post-input" placeholder="Share your culinary thoughts, tips, or ask questions..."></textarea>
+                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&h=50&fit=crop&crop=face" alt="Your Profile" id="currentUserImage">
+                            <textarea class="create-post-input" placeholder="Share your culinary thoughts, tips, or ask questions..." id="postContent"></textarea>
                         </div>
                         <div class="create-post-actions">
                             <div class="post-options">
-                                <div class="post-option">
+                                <div class="post-option" onclick="alert('Image upload coming soon!')">
                                     <i class="fas fa-image"></i>
                                     <span>Photo</span>
                                 </div>
-                                <div class="post-option">
+                                <div class="post-option" onclick="alert('Recipe linking coming soon!')">
                                     <i class="fas fa-utensils"></i>
                                     <span>Recipe</span>
                                 </div>
-                                <div class="post-option">
+                                <div class="post-option" onclick="alert('Poll creation coming soon!')">
                                     <i class="fas fa-poll"></i>
                                     <span>Poll</span>
                                 </div>
                             </div>
-                            <button class="btn btn-secondary">
+                            <button class="btn btn-secondary" id="postButton" onclick="createPost()">
                                 <i class="fas fa-paper-plane"></i>
                                 Post
                             </button>
                         </div>
                     </div>
 
+                    <!-- Alert messages -->
+                    <div id="alertContainer"></div>
+
                     <!-- Community Posts -->
                     <div id="communityPosts">
-                        <!-- Posts will be populated by JavaScript -->
+                        <div style="text-align: center; padding: 40px;">
+                            <i class="fas fa-spinner fa-spin" style="font-size: 24px; color: #667eea;"></i>
+                            <p>Loading community posts...</p>
+                        </div>
                     </div>
                 </div>
 
@@ -1002,144 +1047,286 @@
     </nav>
 
     <script>
-        const communityPosts = [
-            {
-                id: 1,
-                user: "Maria Rodriguez",
-                avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=50&h=50&fit=crop&crop=face",
-                time: "2 hours ago",
-                content: "Just finished making my grandmother's secret paella recipe! The key is using bomba rice and letting the socarrat form naturally. Who else loves that crispy bottom layer? 🥘",
-                image: "https://images.unsplash.com/photo-1534080564583-6be75777b70a?w=500&h=300&fit=crop",
-                tags: ["#Paella", "#Spanish", "#FamilyRecipe"],
-                likes: 45,
-                comments: 12,
-                shares: 8,
-                liked: false
-            },
-            {
-                id: 2,
-                user: "David Kim",
-                avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face",
-                time: "4 hours ago",
-                content: "Quick question for the baking community: What's your go-to method for achieving the perfect sourdough crust? I've been experimenting with steam techniques but would love to hear your tips!",
-                tags: ["#SourdoughTips", "#Baking", "#Help"],
-                likes: 23,
-                comments: 18,
-                shares: 3,
-                liked: true
-            },
-            {
-                id: 3,
-                user: "Sarah Chen",
-                avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=50&h=50&fit=crop&crop=face",
-                time: "6 hours ago",
-                content: "Made these matcha white chocolate cookies for a friend's birthday party. The earthy matcha pairs beautifully with the sweet white chocolate. Recipe in comments! 🍪",
-                image: "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=500&h=300&fit=crop",
-                tags: ["#Matcha", "#Cookies", "#Dessert"],
-                likes: 67,
-                comments: 24,
-                shares: 15,
-                liked: false
-            },
-            {
-                id: 4,
-                user: "Emma Wilson",
-                avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=50&h=50&fit=crop&crop=face",
-                time: "8 hours ago",
-                content: "Sunday meal prep session complete! This week's menu: Mediterranean quinoa bowls, Thai curry with jasmine rice, and overnight oats with fresh berries. Prep day = stress-free week! 💪",
-                image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&h=300&fit=crop",
-                tags: ["#MealPrep", "#Healthy", "#Sunday"],
-                likes: 89,
-                comments: 31,
-                shares: 22,
-                liked: true
-            },
-            {
-                id: 5,
-                user: "Chef Antonio",
-                avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=50&h=50&fit=crop&crop=face",
-                time: "12 hours ago",
-                content: "Pro tip: Always let your steak rest for at least 5 minutes after cooking. This allows the juices to redistribute throughout the meat, resulting in a more tender and flavorful bite. What's your favorite cut for grilling?",
-                tags: ["#SteakTips", "#Grilling", "#ProTips"],
-                likes: 156,
-                comments: 43,
-                shares: 28,
-                liked: false
-            }
-        ];
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyA3RPDDpIbLUdPRkJpHtkqap7VwxxApwgk",
+            authDomain: "foodiehive-a6f18.firebaseapp.com",
+            projectId: "foodiehive-a6f18",
+            storageBucket: "foodiehive-a6f18.appspot.com",
+            messagingSenderId: "1004100513391",
+            appId: "1:1004100513391:web:650ee3533bf8b5e289e79a",
+            measurementId: "G-P071E6HP43"
+        };
 
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // Current user data
+        let currentUser = null;
+
+        // Initialize the app when the page loads
+        document.addEventListener("DOMContentLoaded", () => {
+            // Check auth state
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    // User is signed in
+                    currentUser = {
+                        uid: user.uid,
+                        displayName: user.displayName || "Anonymous User",
+                        photoURL: user.photoURL || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&h=50&fit=crop&crop=face",
+                        email: user.email
+                    };
+                    
+                    // Update profile image in header
+                    document.getElementById('profileImage').src = currentUser.photoURL;
+                    document.getElementById('currentUserImage').src = currentUser.photoURL;
+                    
+                    // Load community posts
+                    loadCommunityPosts();
+                } else {
+                    // No user is signed in, redirect to login
+                    window.location.href = 'index.html';
+                }
+            });
+        });
+
+        // Load community posts from Firestore
         function loadCommunityPosts() {
             const postsContainer = document.getElementById("communityPosts");
-            postsContainer.innerHTML = communityPosts
-                .map(
-                    (post) => `
-                    <div class="community-post">
-                        <div class="post-header">
-                            <img src="${post.avatar}" alt="${post.user}" class="post-avatar">
-                            <div class="post-user-info">
-                                <h4>${post.user}</h4>
-                                <div class="post-time">${post.time}</div>
+            
+            // Clear loading message
+            postsContainer.innerHTML = '';
+            
+            // Get posts from Firestore, ordered by timestamp
+            db.collection("communityPosts")
+                .orderBy("timestamp", "desc")
+                .onSnapshot((querySnapshot) => {
+                    postsContainer.innerHTML = '';
+                    
+                    if (querySnapshot.empty) {
+                        postsContainer.innerHTML = `
+                            <div style="text-align: center; padding: 40px;">
+                                <i class="fas fa-comments" style="font-size: 24px; color: #667eea;"></i>
+                                <p>No posts yet. Be the first to share!</p>
                             </div>
-                        </div>
-                        <div class="post-content">
-                            ${post.content}
-                        </div>
-                        ${post.image ? `<img src="${post.image}" alt="Post image" class="post-image">` : ''}
-                        <div class="post-tags">
-                            ${post.tags.map(tag => `<span class="post-tag">${tag}</span>`).join('')}
-                        </div>
-                        <div class="post-actions">
-                            <div class="post-engagement">
-                                <button class="engagement-btn ${post.liked ? 'liked' : ''}" onclick="toggleLike(${post.id}, this)">
-                                    <i class="fas fa-heart"></i>
-                                    <span>${post.likes}</span>
-                                </button>
-                                <button class="engagement-btn" onclick="showComments(${post.id})">
-                                    <i class="fas fa-comment"></i>
-                                    <span>${post.comments}</span>
-                                </button>
-                                <button class="engagement-btn" onclick="sharePost(${post.id})">
-                                    <i class="fas fa-share"></i>
-                                    <span>${post.shares}</span>
-                                </button>
+                        `;
+                        return;
+                    }
+                    
+                    querySnapshot.forEach((doc) => {
+                        const post = doc.data();
+                        const postId = doc.id;
+                        const postDate = post.timestamp ? post.timestamp.toDate() : new Date();
+                        const timeAgo = getTimeAgo(postDate);
+                        
+                        // Check if current user has liked this post
+                        const hasLiked = post.likes && post.likes.includes(currentUser.uid);
+                        
+                        // Create post HTML
+                        const postElement = document.createElement('div');
+                        postElement.className = 'community-post';
+                        postElement.innerHTML = `
+                            <div class="post-header">
+                                <img src="${post.userPhotoURL || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&h=50&fit=crop&crop=face'}" alt="${post.userName}" class="post-avatar">
+                                <div class="post-user-info">
+                                    <h4>${post.userName}</h4>
+                                    <div class="post-time">${timeAgo}</div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                `
-                )
-                .join("");
+                            <div class="post-content">
+                                ${post.content}
+                            </div>
+                            ${post.imageUrl ? `<img src="${post.imageUrl}" alt="Post image" class="post-image">` : ''}
+                            ${post.tags && post.tags.length > 0 ? `
+                                <div class="post-tags">
+                                    ${post.tags.map(tag => `<span class="post-tag">${tag}</span>`).join('')}
+                                </div>
+                            ` : ''}
+                            <div class="post-actions">
+                                <div class="post-engagement">
+                                    <button class="engagement-btn ${hasLiked ? 'liked' : ''}" onclick="toggleLike('${postId}', this)">
+                                        <i class="fas fa-heart"></i>
+                                        <span>${post.likes ? post.likes.length : 0}</span>
+                                    </button>
+                                    <button class="engagement-btn" onclick="showComments('${postId}')">
+                                        <i class="fas fa-comment"></i>
+                                        <span>${post.comments ? post.comments.length : 0}</span>
+                                    </button>
+                                    <button class="engagement-btn" onclick="sharePost('${postId}')">
+                                        <i class="fas fa-share"></i>
+                                        <span>${post.shares || 0}</span>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        
+                        postsContainer.appendChild(postElement);
+                    });
+                }, (error) => {
+                    showAlert('error', 'Error loading posts: ' + error.message);
+                });
         }
 
-        function toggleLike(postId, button) {
-            const post = communityPosts.find(p => p.id === postId);
-            const likeCount = button.querySelector('span');
+        // Create a new post
+        function createPost() {
+            const postContent = document.getElementById('postContent').value.trim();
+            const postButton = document.getElementById('postButton');
             
-            if (post.liked) {
-                post.likes--;
-                post.liked = false;
-                button.classList.remove('liked');
-            } else {
-                post.likes++;
-                post.liked = true;
-                button.classList.add('liked');
+            if (!postContent) {
+                showAlert('error', 'Please write something to post');
+                return;
             }
             
-            likeCount.textContent = post.likes;
+            // Disable button and show loading
+            postButton.disabled = true;
+            postButton.innerHTML = '<span class="spinner"></span> Posting...';
+            
+            // Extract tags from content (words starting with #)
+            const tags = [];
+            const words = postContent.split(/\s+/);
+            words.forEach(word => {
+                if (word.startsWith('#') && word.length > 1) {
+                    tags.push(word);
+                }
+            });
+            
+            // Create post data
+            const postData = {
+                content: postContent,
+                userName: currentUser.displayName,
+                userPhotoURL: currentUser.photoURL,
+                userId: currentUser.uid,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                likes: [],
+                comments: [],
+                shares: 0,
+                tags: tags
+            };
+            
+            // Add to Firestore
+            db.collection("communityPosts").add(postData)
+                .then(() => {
+                    // Clear input and enable button
+                    document.getElementById('postContent').value = '';
+                    postButton.disabled = false;
+                    postButton.innerHTML = '<i class="fas fa-paper-plane"></i> Post';
+                    
+                    // Show success message
+                    showAlert('success', 'Your post has been shared with the community!');
+                })
+                .catch((error) => {
+                    postButton.disabled = false;
+                    postButton.innerHTML = '<i class="fas fa-paper-plane"></i> Post';
+                    showAlert('error', 'Error posting: ' + error.message);
+                });
         }
 
+        // Toggle like on a post
+        function toggleLike(postId, button) {
+            if (!currentUser) return;
+            
+            const postRef = db.collection("communityPosts").doc(postId);
+            
+            // Get current likes
+            postRef.get().then(doc => {
+                if (!doc.exists) return;
+                
+                const post = doc.data();
+                const likes = post.likes || [];
+                const likeCount = button.querySelector('span');
+                
+                // Check if user already liked
+                const userIndex = likes.indexOf(currentUser.uid);
+                
+                if (userIndex === -1) {
+                    // Add like
+                    likes.push(currentUser.uid);
+                    button.classList.add('liked');
+                } else {
+                    // Remove like
+                    likes.splice(userIndex, 1);
+                    button.classList.remove('liked');
+                }
+                
+                // Update in Firestore
+                postRef.update({ likes: likes })
+                    .then(() => {
+                        likeCount.textContent = likes.length;
+                    })
+                    .catch(error => {
+                        showAlert('error', 'Error updating like: ' + error.message);
+                    });
+            });
+        }
+
+        // Show comments (placeholder)
         function showComments(postId) {
             alert(`Comments for post ${postId} - Comments feature coming soon!`);
         }
 
+        // Share post (placeholder)
         function sharePost(postId) {
             alert(`Sharing post ${postId} - Share feature coming soon!`);
         }
 
+        // Show alert message
+        function showAlert(type, message) {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            alertContainer.appendChild(alertDiv);
+            
+            // Remove after 5 seconds
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // Get time ago string
+        function getTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            
+            let interval = Math.floor(seconds / 31536000);
+            if (interval >= 1) return interval + " year" + (interval === 1 ? "" : "s") + " ago";
+            
+            interval = Math.floor(seconds / 2592000);
+            if (interval >= 1) return interval + " month" + (interval === 1 ? "" : "s") + " ago";
+            
+            interval = Math.floor(seconds / 86400);
+            if (interval >= 1) return interval + " day" + (interval === 1 ? "" : "s") + " ago";
+            
+            interval = Math.floor(seconds / 3600);
+            if (interval >= 1) return interval + " hour" + (interval === 1 ? "" : "s") + " ago";
+            
+            interval = Math.floor(seconds / 60);
+            if (interval >= 1) return interval + " minute" + (interval === 1 ? "" : "s") + " ago";
+            
+            return "just now";
+        }
+
+        // Logout function
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = 'index.html';
+            }).catch(error => {
+                showAlert('error', 'Error signing out: ' + error.message);
+            });
+        }
+
+        // Toggle mobile menu
         function toggleMobileMenu() {
             const mobileMenu = document.getElementById("mobileMenu");
             mobileMenu.classList.toggle("show");
         }
 
+        // Toggle profile menu
         function toggleProfileMenu() {
             const profileMenu = document.getElementById("profileMenu");
             profileMenu.classList.toggle("show");
@@ -1152,18 +1339,13 @@
             const mobileMenuBtn = document.querySelector(".mobile-menu-btn");
             const profileBtn = document.querySelector(".profile-btn");
 
-            if (!mobileMenuBtn.contains(event.target) && !mobileMenu.contains(event.target)) {
+            if (mobileMenuBtn && !mobileMenuBtn.contains(event.target) ){
                 mobileMenu.classList.remove("show");
             }
 
-            if (!profileBtn.contains(event.target) && !profileMenu.contains(event.target)) {
+            if (profileBtn && !profileBtn.contains(event.target)) {
                 profileMenu.classList.remove("show");
             }
-        });
-
-        // Initialize posts on page load
-        document.addEventListener("DOMContentLoaded", () => {
-            loadCommunityPosts();
         });
     </script>
 </body>
