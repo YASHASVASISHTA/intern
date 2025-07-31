@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blogs - FoodieHive</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Add Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -199,6 +203,27 @@
         .btn-secondary:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 25px rgba(240, 147, 251, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+        }
+
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
         }
 
         .profile-dropdown {
@@ -614,6 +639,147 @@
             }
         }
 
+        /* Blog Detail View */
+        .blog-detail {
+            display: none;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .blog-detail-header {
+            margin-bottom: 30px;
+        }
+
+        .blog-detail-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #1a202c;
+        }
+
+        .blog-detail-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .blog-detail-author {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .blog-detail-author img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .blog-detail-date {
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .blog-detail-category {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .blog-detail-image {
+            width: 100%;
+            height: 400px;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .blog-detail-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .blog-detail-content {
+            line-height: 1.8;
+            font-size: 18px;
+        }
+
+        .blog-detail-content h2 {
+            font-size: 24px;
+            margin: 30px 0 15px;
+            color: #1a202c;
+        }
+
+        .blog-detail-content p {
+            margin-bottom: 20px;
+        }
+
+        .blog-detail-content ul,
+        .blog-detail-content ol {
+            margin-bottom: 20px;
+            padding-left: 20px;
+        }
+
+        .blog-detail-footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .blog-detail-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .blog-detail-tag {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .blog-detail-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-to-blogs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #667eea;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .blog-detail-stats {
+            display: flex;
+            gap: 20px;
+        }
+
+        .blog-detail-stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #64748b;
+            font-weight: 500;
+        }
+
         /* Mobile Bottom Navigation */
         .mobile-bottom-nav {
             display: flex;
@@ -668,6 +834,34 @@
         .nav-item span {
             font-size: 12px;
             font-weight: 600;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.error {
+            background: #f44336;
         }
     </style>
 </head>
@@ -747,7 +941,7 @@
                             Settings
                         </a>
                         <hr>
-                        <a href="index.html">
+                        <a href="#" onclick="logout()">
                             <i class="fas fa-sign-out-alt"></i>
                             Logout
                         </a>
@@ -790,49 +984,101 @@
     <!-- App Content -->
     <main class="app-content">
         <div class="container">
-            <div class="page-header">
-                <div class="page-title">
-                    <i class="fas fa-book animate-float"></i>
-                    <h1>Food Blogs</h1>
-                    <i class="fas fa-pen animate-float"></i>
-                </div>
-                <p>Discover culinary stories and cooking tips from our community</p>
-            </div>
-
-            <!-- Featured Blog -->
-            <div class="featured-blog">
-                <div class="featured-title">
-                    <i class="fas fa-star"></i>
-                    Featured Article
-                </div>
-                <div class="featured-content">
-                    <div class="featured-text">
-                        <h3>The Art of Fermentation</h3>
-                        <p>Discover the ancient art of fermentation and how it can transform your cooking. From kimchi to kombucha, learn the science behind these flavorful transformations.</p>
-                        <button class="btn btn-secondary">
-                            <i class="fas fa-eye"></i>
-                            Read Article
-                        </button>
+            <!-- Blog List View -->
+            <div id="blogListView">
+                <div class="page-header">
+                    <div class="page-title">
+                        <i class="fas fa-book animate-float"></i>
+                        <h1>Food Blogs</h1>
+                        <i class="fas fa-pen animate-float"></i>
                     </div>
-                    <div class="featured-image">
-                        <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=250&fit=crop" alt="Fermentation">
+                    <p>Discover culinary stories and cooking tips from our community</p>
+                </div>
+
+                <!-- Featured Blog -->
+                <div class="featured-blog">
+                    <div class="featured-title">
+                        <i class="fas fa-star"></i>
+                        Featured Article
                     </div>
+                    <div class="featured-content">
+                        <div class="featured-text">
+                            <h3>The Art of Fermentation</h3>
+                            <p>Discover the ancient art of fermentation and how it can transform your cooking. From kimchi to kombucha, learn the science behind these flavorful transformations.</p>
+                            <button class="btn btn-secondary" id="featuredBlogBtn">
+                                <i class="fas fa-eye"></i>
+                                Read Article
+                            </button>
+                        </div>
+                        <div class="featured-image">
+                            <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=250&fit=crop" alt="Fermentation">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Categories -->
+                <div class="categories">
+                    <button class="category-btn active" onclick="filterBlogs('All', this)">All Posts</button>
+                    <button class="category-btn" onclick="filterBlogs('Cooking Tips', this)">Cooking Tips</button>
+                    <button class="category-btn" onclick="filterBlogs('Nutrition', this)">Nutrition</button>
+                    <button class="category-btn" onclick="filterBlogs('Culture', this)">Food Culture</button>
+                    <button class="category-btn" onclick="filterBlogs('Reviews', this)">Reviews</button>
+                    <button class="category-btn" onclick="filterBlogs('Stories', this)">Stories</button>
+                </div>
+
+                <!-- Blog Grid -->
+                <div class="blogs-grid" id="blogsGrid">
+                    <!-- Blogs will be populated by JavaScript -->
                 </div>
             </div>
 
-            <!-- Categories -->
-            <div class="categories">
-                <button class="category-btn active" onclick="filterBlogs('All', this)">All Posts</button>
-                <button class="category-btn" onclick="filterBlogs('Cooking Tips', this)">Cooking Tips</button>
-                <button class="category-btn" onclick="filterBlogs('Nutrition', this)">Nutrition</button>
-                <button class="category-btn" onclick="filterBlogs('Culture', this)">Food Culture</button>
-                <button class="category-btn" onclick="filterBlogs('Reviews', this)">Reviews</button>
-                <button class="category-btn" onclick="filterBlogs('Stories', this)">Stories</button>
-            </div>
+            <!-- Blog Detail View -->
+            <div id="blogDetailView" class="blog-detail">
+                <div class="blog-detail-header">
+                    <h1 class="blog-detail-title" id="detailTitle"></h1>
+                    <div class="blog-detail-meta">
+                        <div class="blog-detail-author">
+                            <img id="detailAuthorImage" src="" alt="Author">
+                            <span id="detailAuthor"></span>
+                        </div>
+                        <div class="blog-detail-date" id="detailDate"></div>
+                        <div class="blog-detail-category" id="detailCategory"></div>
+                    </div>
+                </div>
 
-            <!-- Blog Grid -->
-            <div class="blogs-grid" id="blogsGrid">
-                <!-- Blogs will be populated by JavaScript -->
+                <div class="blog-detail-image">
+                    <img id="detailImage" src="" alt="Blog Image">
+                </div>
+
+                <div class="blog-detail-content" id="detailContent">
+                    <!-- Content will be inserted here -->
+                </div>
+
+                <div class="blog-detail-footer">
+                    <div class="blog-detail-tags" id="detailTags">
+                        <!-- Tags will be inserted here -->
+                    </div>
+                    <div class="blog-detail-actions">
+                        <div class="back-to-blogs" onclick="showBlogList()">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Back to Blogs</span>
+                        </div>
+                        <div class="blog-detail-stats">
+                            <div class="blog-detail-stat">
+                                <i class="fas fa-heart"></i>
+                                <span id="detailLikes">0</span>
+                            </div>
+                            <div class="blog-detail-stat">
+                                <i class="fas fa-comment"></i>
+                                <span id="detailComments">0</span>
+                            </div>
+                            <div class="blog-detail-stat">
+                                <i class="fas fa-clock"></i>
+                                <span id="detailReadTime">0 min</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
@@ -861,100 +1107,87 @@
         </a>
     </nav>
 
-    <script>
-        const blogs = [
-            {
-                id: 1,
-                title: "10 Essential Knife Skills Every Home Cook Should Master",
-                author: "Chef Maria Rodriguez",
-                authorImage: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=24&h=24&fit=crop&crop=face",
-                image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=200&fit=crop",
-                category: "Cooking Tips",
-                date: "Dec 15",
-                readTime: "8 min",
-                likes: 234,
-                comments: 18,
-                excerpt: "Master these fundamental knife techniques to improve your cooking efficiency and safety in the kitchen.",
-                tags: ["Techniques", "Basics", "Safety"]
-            },
-            {
-                id: 2,
-                title: "The Mediterranean Diet: A Journey Through Flavor and Health",
-                author: "Dr. Elena Costa",
-                authorImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=24&h=24&fit=crop&crop=face",
-                image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=200&fit=crop",
-                category: "Nutrition",
-                date: "Dec 12",
-                readTime: "12 min",
-                likes: 189,
-                comments: 24,
-                excerpt: "Explore the health benefits and delicious flavors of the Mediterranean diet with practical tips for everyday cooking.",
-                tags: ["Health", "Mediterranean", "Lifestyle"]
-            },
-            {
-                id: 3,
-                title: "Street Food Adventures: Bangkok's Hidden Culinary Gems",
-                author: "Travel Foodie",
-                authorImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=24&h=24&fit=crop&crop=face",
-                image: "https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=400&h=200&fit=crop",
-                category: "Culture",
-                date: "Dec 10",
-                readTime: "15 min",
-                likes: 456,
-                comments: 67,
-                excerpt: "Discover the vibrant street food scene of Bangkok through the eyes of a local food enthusiast.",
-                tags: ["Travel", "Street Food", "Thai"]
-            },
-            {
-                id: 4,
-                title: "Sourdough Starter: Your Gateway to Artisan Bread",
-                author: "Baker John",
-                authorImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=24&h=24&fit=crop&crop=face",
-                image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=200&fit=crop",
-                category: "Cooking Tips",
-                date: "Dec 8",
-                readTime: "10 min",
-                likes: 298,
-                comments: 31,
-                excerpt: "Learn how to create and maintain a sourdough starter for delicious homemade bread.",
-                tags: ["Baking", "Bread", "Fermentation"]
-            },
-            {
-                id: 5,
-                title: "Farm-to-Table: Building Relationships with Local Producers",
-                author: "Sarah Green",
-                authorImage: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=24&h=24&fit=crop&crop=face",
-                image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&h=200&fit=crop",
-                category: "Stories",
-                date: "Dec 5",
-                readTime: "7 min",
-                likes: 367,
-                comments: 45,
-                excerpt: "The importance of supporting local farmers and how it enhances both flavor and community.",
-                tags: ["Local", "Sustainability", "Community"]
-            },
-            {
-                id: 6,
-                title: "Spice Route: Understanding Global Flavor Profiles",
-                author: "Spice Master",
-                authorImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=24&h=24&fit=crop&crop=face",
-                image: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=200&fit=crop",
-                category: "Culture",
-                date: "Dec 3",
-                readTime: "11 min",
-                likes: 445,
-                comments: 52,
-                excerpt: "Journey through different cuisines and learn how spices define regional cooking styles.",
-                tags: ["Spices", "Global", "Flavors"]
-            }
-        ];
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Settings saved successfully!</span>
+    </div>
 
-        function loadBlogs(blogsToShow = blogs) {
-            const blogsGrid = document.getElementById("blogsGrid");
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyA3RPDDpIbLUdPRkJpHtkqap7VwxxApwgk",
+            authDomain: "foodiehive-a6f18.firebaseapp.com",
+            projectId: "foodiehive-a6f18",
+            storageBucket: "foodiehive-a6f18.firebasestorage.app",
+            messagingSenderId: "1004100513391",
+            appId: "1:1004100513391:web:650ee3533bf8b5e289e79a",
+            measurementId: "G-P071E6HP43"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // Current user data
+        let currentUser = null;
+        let blogs = [];
+        let featuredBlog = null;
+
+        // DOM elements
+        const blogListView = document.getElementById('blogListView');
+        const blogDetailView = document.getElementById('blogDetailView');
+        const blogsGrid = document.getElementById('blogsGrid');
+        const featuredBlogBtn = document.getElementById('featuredBlogBtn');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if user is logged in
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    currentUser = user;
+                    loadBlogs();
+                } else {
+                    // Redirect to login if not authenticated
+                    window.location.href = 'index.html';
+                }
+            });
+
+            // Featured blog button
+            featuredBlogBtn.addEventListener('click', () => {
+                if (featuredBlog) {
+                    showBlogDetail(featuredBlog);
+                }
+            });
+        });
+
+        // Load blogs from Firestore
+        async function loadBlogs() {
+            try {
+                const querySnapshot = await db.collection('blogs').orderBy('createdAt', 'desc').get();
+                blogs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                // Set the first blog as featured
+                if (blogs.length > 0) {
+                    featuredBlog = blogs[0];
+                }
+                
+                loadBlogList(blogs);
+            } catch (error) {
+                showToast('Error loading blogs: ' + error.message, true);
+                console.error('Error loading blogs:', error);
+            }
+        }
+
+        // Load blog list view
+        function loadBlogList(blogsToShow) {
             blogsGrid.innerHTML = blogsToShow
                 .map(
                     (blog) => `
-                    <div class="blog-card" onclick="viewBlog(${blog.id})">
+                    <div class="blog-card" onclick="showBlogDetail('${blog.id}')">
                         <div class="blog-image">
                             <img src="${blog.image}" alt="${blog.title}">
                             <div class="blog-category">${blog.category}</div>
@@ -993,6 +1226,7 @@
                 .join("");
         }
 
+        // Filter blogs by category
         function filterBlogs(category, button) {
             // Update active category button
             document.querySelectorAll(".category-btn").forEach((btn) => {
@@ -1002,18 +1236,101 @@
 
             // Filter and display blogs
             const filteredBlogs = category === "All" ? blogs : blogs.filter((blog) => blog.category === category);
-            loadBlogs(filteredBlogs);
+            loadBlogList(filteredBlogs);
         }
 
-        function viewBlog(id) {
-            alert(`Viewing blog ${id} - Blog detail page coming soon!`);
+        // Show blog detail view
+        async function showBlogDetail(blogId) {
+            try {
+                let blog;
+                
+                if (typeof blogId === 'object') {
+                    // If we're passed a blog object directly (for featured blog)
+                    blog = blogId;
+                } else {
+                    // Find the blog in our array or fetch it if not found
+                    blog = blogs.find(b => b.id === blogId);
+                    if (!blog) {
+                        const doc = await db.collection('blogs').doc(blogId).get();
+                        if (doc.exists) {
+                            blog = { id: doc.id, ...doc.data() };
+                        } else {
+                            throw new Error('Blog not found');
+                        }
+                    }
+                }
+
+                // Update the detail view
+                document.getElementById('detailTitle').textContent = blog.title;
+                document.getElementById('detailAuthor').textContent = blog.author;
+                document.getElementById('detailAuthorImage').src = blog.authorImage;
+                document.getElementById('detailDate').textContent = blog.date;
+                document.getElementById('detailCategory').textContent = blog.category;
+                document.getElementById('detailImage').src = blog.image;
+                document.getElementById('detailContent').innerHTML = blog.content;
+                document.getElementById('detailLikes').textContent = blog.likes;
+                document.getElementById('detailComments').textContent = blog.comments;
+                document.getElementById('detailReadTime').textContent = blog.readTime;
+                
+                // Update tags
+                const tagsContainer = document.getElementById('detailTags');
+                tagsContainer.innerHTML = blog.tags.map(tag => 
+                    `<span class="blog-detail-tag">${tag}</span>`
+                ).join('');
+                
+                // Show detail view and hide list view
+                blogListView.style.display = 'none';
+                blogDetailView.style.display = 'block';
+                
+                // Scroll to top
+                window.scrollTo(0, 0);
+            } catch (error) {
+                showToast('Error loading blog: ' + error.message, true);
+                console.error('Error loading blog:', error);
+            }
         }
 
+        // Show blog list view
+        function showBlogList() {
+            blogDetailView.style.display = 'none';
+            blogListView.style.display = 'block';
+        }
+
+        // Logout
+        async function logout() {
+            try {
+                await auth.signOut();
+                window.location.href = 'index.html';
+            } catch (error) {
+                showToast('Error logging out: ' + error.message, true);
+                console.error('Error logging out:', error);
+            }
+        }
+
+        // Show toast notification
+        function showToast(message, isError = false) {
+            toastMessage.textContent = message;
+            
+            if (isError) {
+                toast.classList.add('error');
+            } else {
+                toast.classList.remove('error');
+            }
+            
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Toggle mobile menu
         function toggleMobileMenu() {
             const mobileMenu = document.getElementById("mobileMenu");
             mobileMenu.classList.toggle("show");
         }
 
+        // Toggle profile menu
         function toggleProfileMenu() {
             const profileMenu = document.getElementById("profileMenu");
             profileMenu.classList.toggle("show");
@@ -1033,11 +1350,6 @@
             if (!profileBtn.contains(event.target) && !profileMenu.contains(event.target)) {
                 profileMenu.classList.remove("show");
             }
-        });
-
-        // Initialize blogs on page load
-        document.addEventListener("DOMContentLoaded", () => {
-            loadBlogs();
         });
     </script>
 </body>
