@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home - FoodieHive</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -565,6 +568,26 @@
             color: #f093fb;
         }
 
+        /* Loading State */
+        .loading {
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(102, 126, 234, 0.1);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         /* Mobile Bottom Navigation */
         .mobile-bottom-nav {
             display: flex;
@@ -774,90 +797,12 @@
             </div>
 
             <!-- Feed -->
-            <div class="feed">
-                <!-- Post 1 -->
-                <div class="post-card">
-                    <div class="post-header">
-                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=48&h=48&fit=crop&crop=face" alt="Alex Johnson" class="post-avatar">
-                        <div class="post-author">
-                            <div class="author-name">
-                                <span>Alex Johnson</span>
-                                <div class="author-badge chef">
-                                    <i class="fas fa-hat-chef"></i>
-                                    Chef
-                                </div>
-                            </div>
-                            <span class="post-time">2 hours ago</span>
-                        </div>
-                    </div>
-                    <p class="post-content">
-                        Just created this incredible rainbow Buddha bowl! 🌈 Perfect harmony of fresh flavors and vibrant colors ✨
-                    </p>
-                    <div class="post-image">
-                        <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&h=300&fit=crop" alt="Buddha Bowl">
-                    </div>
-                    <div class="post-actions">
-                        <div class="action-buttons">
-                            <button class="action-btn-small" onclick="toggleLike(this)">
-                                <i class="fas fa-heart"></i>
-                                124
-                            </button>
-                            <button class="action-btn-small">
-                                <i class="fas fa-comment"></i>
-                                18
-                            </button>
-                            <button class="action-btn-small">
-                                <i class="fas fa-share"></i>
-                                Share
-                            </button>
-                        </div>
-                        <button class="action-btn-small bookmark">
-                            <i class="fas fa-bookmark"></i>
-                        </button>
-                    </div>
+            <div class="feed" id="postsFeed">
+                <!-- Loading State -->
+                <div class="loading" id="loadingState">
+                    <div class="spinner"></div>
                 </div>
-
-                <!-- Post 2 -->
-                <div class="post-card">
-                    <div class="post-header">
-                        <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=48&h=48&fit=crop&crop=face" alt="Maria Kim" class="post-avatar">
-                        <div class="post-author">
-                            <div class="author-name">
-                                <span>Maria Kim</span>
-                                <div class="author-badge food-lover">
-                                    <i class="fas fa-heart"></i>
-                                    Food Lover
-                                </div>
-                            </div>
-                            <span class="post-time">4 hours ago</span>
-                        </div>
-                    </div>
-                    <p class="post-content">
-                        Sunday brunch magic with these cloud-like pancakes! 🥞 Recipe secrets revealed in comments below 👇
-                    </p>
-                    <div class="post-image">
-                        <img src="https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=500&h=300&fit=crop" alt="Pancakes">
-                    </div>
-                    <div class="post-actions">
-                        <div class="action-buttons">
-                            <button class="action-btn-small" onclick="toggleLike(this)">
-                                <i class="fas fa-heart"></i>
-                                89
-                            </button>
-                            <button class="action-btn-small">
-                                <i class="fas fa-comment"></i>
-                                12
-                            </button>
-                            <button class="action-btn-small">
-                                <i class="fas fa-share"></i>
-                                Share
-                            </button>
-                        </div>
-                        <button class="action-btn-small bookmark">
-                            <i class="fas fa-bookmark"></i>
-                        </button>
-                    </div>
-                </div>
+                <!-- Posts will be loaded here dynamically -->
             </div>
         </div>
     </main>
@@ -887,45 +832,203 @@
     </nav>
 
     <script>
-        function toggleMobileMenu() {
-            const mobileMenu = document.getElementById("mobileMenu");
-            mobileMenu.classList.toggle("show");
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyA3RPDDpIbLUdPRkJpHtkqap7VwxxApwgk",
+            authDomain: "foodiehive-a6f18.firebaseapp.com",
+            projectId: "foodiehive-a6f18",
+            storageBucket: "foodiehive-a6f18.appspot.com",
+            messagingSenderId: "1004100513391",
+            appId: "1:1004100513391:web:650ee3533bf8b5e289e79a",
+            measurementId: "G-P071E6HP43"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // DOM elements
+        const postsFeed = document.getElementById('postsFeed');
+        const loadingState = document.getElementById('loadingState');
+
+        // Function to format timestamp
+        function formatTime(timestamp) {
+            if (!timestamp) return 'Just now';
+            
+            const now = new Date();
+            const postDate = timestamp.toDate();
+            const diffInSeconds = Math.floor((now - postDate) / 1000);
+            
+            if (diffInSeconds < 60) return 'Just now';
+            if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+            if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+            return `${Math.floor(diffInSeconds / 86400)} days ago`;
         }
 
-        function toggleProfileMenu() {
-            const profileMenu = document.getElementById("profileMenu");
-            profileMenu.classList.toggle("show");
+        // Function to render posts
+        function renderPost(post) {
+            return `
+                <div class="post-card">
+                    <div class="post-header">
+                        <img src="${post.authorAvatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(post.authorName) + '&background=667eea&color=fff'}" 
+                             alt="${post.authorName}" class="post-avatar">
+                        <div class="post-author">
+                            <div class="author-name">
+                                <span>${post.authorName}</span>
+                                <div class="author-badge ${post.authorType === 'chef' ? 'chef' : 'food-lover'}">
+                                    <i class="fas ${post.authorType === 'chef' ? 'fa-hat-chef' : 'fa-heart'}"></i>
+                                    ${post.authorType === 'chef' ? 'Chef' : 'Food Lover'}
+                                </div>
+                            </div>
+                            <span class="post-time">${formatTime(post.timestamp)}</span>
+                        </div>
+                    </div>
+                    <p class="post-content">${post.content}</p>
+                    ${post.imageUrl ? `
+                    <div class="post-image">
+                        <img src="${post.imageUrl}" alt="Post image" onerror="this.style.display='none'">
+                    </div>
+                    ` : ''}
+                    <div class="post-actions">
+                        <div class="action-buttons">
+                            <button class="action-btn-small" onclick="toggleLike(this, '${post.id}')">
+                                <i class="fas fa-heart"></i>
+                                <span>${post.likes || 0}</span>
+                            </button>
+                            <button class="action-btn-small">
+                                <i class="fas fa-comment"></i>
+                                <span>${post.comments || 0}</span>
+                            </button>
+                            <button class="action-btn-small">
+                                <i class="fas fa-share"></i>
+                                Share
+                            </button>
+                        </div>
+                        <button class="action-btn-small bookmark">
+                            <i class="fas fa-bookmark"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
         }
 
-        function toggleLike(button) {
-            button.classList.toggle("liked");
-            const icon = button.querySelector("i");
-            const count = button.querySelector("span");
+        // Function to fetch and display posts
+        function fetchPosts() {
+            loadingState.style.display = 'flex';
+            postsFeed.innerHTML = '';
+            
+            db.collection('posts')
+                .orderBy('timestamp', 'desc')
+                .limit(10)
+                .get()
+                .then((querySnapshot) => {
+                    if (querySnapshot.empty) {
+                        postsFeed.innerHTML = '<p style="text-align:center; padding:40px;">No posts yet. Be the first to share!</p>';
+                        return;
+                    }
+                    
+                    querySnapshot.forEach((doc) => {
+                        const post = { id: doc.id, ...doc.data() };
+                        postsFeed.innerHTML += renderPost(post);
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error fetching posts:', error);
+                    postsFeed.innerHTML = '<p style="text-align:center; padding:40px; color:#ef4444;">Error loading posts. Please try again.</p>';
+                })
+                .finally(() => {
+                    loadingState.style.display = 'none';
+                });
+        }
 
-            if (button.classList.contains("liked")) {
-                icon.style.color = "#f5576c";
-                count.textContent = parseInt(count.textContent) + 1;
+        // Set up real-time listener for new posts
+        function setupRealtimeListener() {
+            db.collection('posts')
+                .orderBy('timestamp', 'desc')
+                .limit(10)
+                .onSnapshot((querySnapshot) => {
+                    postsFeed.innerHTML = '';
+                    querySnapshot.forEach((doc) => {
+                        const post = { id: doc.id, ...doc.data() };
+                        postsFeed.innerHTML += renderPost(post);
+                    });
+                    loadingState.style.display = 'none';
+                }, (error) => {
+                    console.error('Error in realtime listener:', error);
+                });
+        }
+
+        // Toggle like function
+        function toggleLike(button, postId) {
+            button.classList.toggle('liked');
+            const icon = button.querySelector('i');
+            const countSpan = button.querySelector('span');
+            let currentCount = parseInt(countSpan.textContent);
+            
+            if (button.classList.contains('liked')) {
+                icon.style.color = '#f5576c';
+                countSpan.textContent = currentCount + 1;
+                
+                // Update in Firestore
+                db.collection('posts').doc(postId).update({
+                    likes: firebase.firestore.FieldValue.increment(1)
+                });
             } else {
-                icon.style.color = "";
-                count.textContent = parseInt(count.textContent) - 1;
+                icon.style.color = '';
+                countSpan.textContent = currentCount - 1;
+                
+                // Update in Firestore
+                db.collection('posts').doc(postId).update({
+                    likes: firebase.firestore.FieldValue.increment(-1)
+                });
             }
+        }
+
+        // Toggle mobile menu
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            mobileMenu.classList.toggle('show');
+        }
+
+        // Toggle profile menu
+        function toggleProfileMenu() {
+            const profileMenu = document.getElementById('profileMenu');
+            profileMenu.classList.toggle('show');
         }
 
         // Close menus when clicking outside
-        document.addEventListener("click", (event) => {
-            const mobileMenu = document.getElementById("mobileMenu");
-            const profileMenu = document.getElementById("profileMenu");
-            const mobileMenuBtn = document.querySelector(".mobile-menu-btn");
-            const profileBtn = document.querySelector(".profile-btn");
+        document.addEventListener('click', (event) => {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const profileMenu = document.getElementById('profileMenu');
+            const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+            const profileBtn = document.querySelector('.profile-btn');
 
             if (!mobileMenuBtn.contains(event.target) && !mobileMenu.contains(event.target)) {
-                mobileMenu.classList.remove("show");
+                mobileMenu.classList.remove('show');
             }
 
             if (!profileBtn.contains(event.target) && !profileMenu.contains(event.target)) {
-                profileMenu.classList.remove("show");
+                profileMenu.classList.remove('show');
             }
         });
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check auth state
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    // User is signed in
+                    setupRealtimeListener();
+                } else {
+                    // No user is signed in, just fetch posts once
+                    fetchPosts();
+                }
+            });
+        });
+
+        // Make toggleLike available globally
+        window.toggleLike = toggleLike;
     </script>
 </body>
 </html>
