@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Restaurants - FoodieHive</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Add Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -563,6 +566,28 @@
             color: #f093fb;
         }
 
+        /* Loading State */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(102, 126, 234, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #667eea;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         /* Mobile Bottom Navigation */
         .mobile-bottom-nav {
             display: flex;
@@ -760,7 +785,10 @@
 
             <!-- Restaurant Grid -->
             <div class="restaurants-grid" id="restaurantsGrid">
-                <!-- Restaurants will be populated by JavaScript -->
+                <!-- Loading state -->
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
             </div>
         </div>
     </main>
@@ -790,135 +818,119 @@
     </nav>
 
     <script>
-        const restaurants = [
-            {
-                id: 1,
-                name: "Bella Vista Italian",
-                cuisine: "Italian",
-                image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=200&fit=crop",
-                rating: 4.8,
-                status: "open",
-                location: "Downtown",
-                price: "$$",
-                description: "Authentic Italian cuisine with a modern twist. Fresh pasta made daily.",
-                likes: 234,
-                reviews: 89,
-                distance: "0.5 mi"
-            },
-            {
-                id: 2,
-                name: "Sakura Sushi Bar",
-                cuisine: "Asian",
-                image: "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=200&fit=crop",
-                rating: 4.9,
-                status: "open",
-                location: "Midtown",
-                price: "$$$",
-                description: "Premium sushi and Japanese cuisine in an elegant setting.",
-                likes: 189,
-                reviews: 156,
-                distance: "1.2 mi"
-            },
-            {
-                id: 3,
-                name: "Taco Libre",
-                cuisine: "Mexican",
-                image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=200&fit=crop",
-                rating: 4.6,
-                status: "open",
-                location: "East Side",
-                price: "$",
-                description: "Vibrant Mexican street food with fresh ingredients and bold flavors.",
-                likes: 156,
-                reviews: 78,
-                distance: "2.1 mi"
-            },
-            {
-                id: 4,
-                name: "The Garden Bistro",
-                cuisine: "Mediterranean",
-                image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=200&fit=crop",
-                rating: 4.7,
-                status: "closed",
-                location: "West End",
-                price: "$$",
-                description: "Fresh Mediterranean dishes with locally sourced ingredients.",
-                likes: 298,
-                reviews: 134,
-                distance: "1.8 mi"
-            },
-            {
-                id: 5,
-                name: "Burger Junction",
-                cuisine: "American",
-                image: "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400&h=200&fit=crop",
-                rating: 4.4,
-                status: "open",
-                location: "City Center",
-                price: "$$",
-                description: "Gourmet burgers and craft beer in a casual atmosphere.",
-                likes: 445,
-                reviews: 267,
-                distance: "0.8 mi"
-            },
-            {
-                id: 6,
-                name: "Spice Route",
-                cuisine: "Asian",
-                image: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400&h=200&fit=crop",
-                rating: 4.5,
-                status: "open",
-                location: "North Quarter",
-                price: "$$",
-                description: "Authentic Indian and Thai cuisine with aromatic spices.",
-                likes: 367,
-                reviews: 198,
-                distance: "3.2 mi"
-            }
-        ];
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyA3RPDDpIbLUdPRkJpHtkqap7VwxxApwgk",
+            authDomain: "foodiehive-a6f18.firebaseapp.com",
+            projectId: "foodiehive-a6f18",
+            storageBucket: "foodiehive-a6f18.appspot.com",
+            messagingSenderId: "1004100513391",
+            appId: "1:1004100513391:web:650ee3533bf8b5e289e79a",
+            measurementId: "G-P071E6HP43"
+        };
 
-        function loadRestaurants(restaurantsToShow = restaurants) {
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Global variable to store restaurants
+        let allRestaurants = [];
+
+        // Function to load restaurants from Firestore
+        async function loadRestaurantsFromFirestore() {
+            try {
+                const restaurantsGrid = document.getElementById("restaurantsGrid");
+                
+                // Show loading state
+                restaurantsGrid.innerHTML = `
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                `;
+                
+                // Get restaurants from Firestore
+                const querySnapshot = await db.collection("restaurants").get();
+                
+                allRestaurants = [];
+                querySnapshot.forEach((doc) => {
+                    const restaurantData = doc.data();
+                    // Add the document ID to the restaurant data
+                    restaurantData.id = doc.id;
+                    allRestaurants.push(restaurantData);
+                });
+                
+                // Display all restaurants initially
+                loadRestaurants(allRestaurants);
+            } catch (error) {
+                console.error("Error loading restaurants: ", error);
+                // Show error message
+                const restaurantsGrid = document.getElementById("restaurantsGrid");
+                restaurantsGrid.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #ef4444;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px;"></i>
+                        <h3>Failed to load restaurants</h3>
+                        <p>Please try again later</p>
+                    </div>
+                `;
+            }
+        }
+
+        function loadRestaurants(restaurantsToShow) {
             const restaurantsGrid = document.getElementById("restaurantsGrid");
+            
+            if (restaurantsToShow.length === 0) {
+                restaurantsGrid.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #64748b;">
+                        <i class="fas fa-utensils" style="font-size: 48px; margin-bottom: 16px;"></i>
+                        <h3>No restaurants found</h3>
+                        <p>Try changing your filters</p>
+                    </div>
+                `;
+                return;
+            }
+            
             restaurantsGrid.innerHTML = restaurantsToShow
                 .map(
                     (restaurant) => `
-                    <div class="restaurant-card" onclick="viewRestaurant(${restaurant.id})">
+                    <div class="restaurant-card" onclick="viewRestaurant('${restaurant.id}')">
                         <div class="restaurant-image">
-                            <img src="${restaurant.image}" alt="${restaurant.name}">
-                            <div class="restaurant-status ${restaurant.status}">${restaurant.status === 'open' ? 'Open' : 'Closed'}</div>
+                            <img src="${restaurant.imagelr1 || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=200&fit=crop'}" alt="${restaurant.name}">
+                            <div class="restaurant-status ${restaurant.status === 'open' ? 'open' : 'closed'}">
+                                ${restaurant.status === 'open' ? 'Open' : 'Closed'}
+                            </div>
                             <div class="restaurant-rating">
                                 <i class="fas fa-star"></i>
-                                ${restaurant.rating}
+                                ${restaurant.rating || 0}
                             </div>
                         </div>
                         <div class="restaurant-content">
                             <h3 class="restaurant-title">${restaurant.name}</h3>
                             <div class="restaurant-cuisine">
                                 <i class="fas fa-utensils"></i>
-                                ${restaurant.cuisine}
+                                ${restaurant.cuisine|| 'Asian'}
                             </div>
-                            <p class="restaurant-description">${restaurant.description}</p>
+                            <p class="restaurant-description">${restaurant.description || 'Authentic cuisine with aromatic spices.'}</p>
                             <div class="restaurant-meta">
                                 <div class="restaurant-location">
                                     <i class="fas fa-map-marker-alt"></i>
-                                    ${restaurant.location}
+                                    ${restaurant.location || 'North Quarter'}
                                 </div>
-                                <div class="restaurant-price">${restaurant.price}</div>
+                                <div class="restaurant-price">${restaurant.priceRange || '$$'}</div>
                             </div>
                             <div class="restaurant-stats">
                                 <div class="restaurant-engagement">
                                     <div class="restaurant-stat">
                                         <i class="fas fa-heart"></i>
-                                        <span>${restaurant.likes}</span>
+                                        <span>${restaurant.likes || 0}</span>
                                     </div>
                                     <div class="restaurant-stat">
                                         <i class="fas fa-star"></i>
-                                        <span>${restaurant.reviews}</span>
+                                        <span>${restaurant.reviewCount || 0}</span>
                                     </div>
                                 </div>
                                 <div class="restaurant-distance">
                                     <i class="fas fa-location-arrow"></i>
-                                    <span>${restaurant.distance}</span>
+                                    <span>${restaurant.distance || '32 mf'}</span>
                                 </div>
                             </div>
                         </div>
@@ -936,12 +948,17 @@
             button.classList.add("active");
 
             // Filter and display restaurants
-            const filteredRestaurants = cuisine === "All" ? restaurants : restaurants.filter((restaurant) => restaurant.cuisine === cuisine);
+            const filteredRestaurants = cuisine === "All" 
+                ? allRestaurants 
+                : allRestaurants.filter((restaurant) => 
+                    (restaurant.cuisine || '').toLowerCase().includes(cuisine.toLowerCase())
+                );
             loadRestaurants(filteredRestaurants);
         }
 
         function viewRestaurant(id) {
-            alert(`Viewing restaurant ${id} - Restaurant detail page coming soon!`);
+            // Redirect to restaurant detail page with the ID
+            window.location.href = `restaurant-detail.html?id=${id}`;
         }
 
         function toggleMobileMenu() {
@@ -972,7 +989,7 @@
 
         // Initialize restaurants on page load
         document.addEventListener("DOMContentLoaded", () => {
-            loadRestaurants();
+            loadRestaurantsFromFirestore();
         });
     </script>
 </body>
