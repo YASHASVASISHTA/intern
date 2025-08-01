@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile - FoodieHive</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Add Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -760,39 +764,35 @@
         <div class="container">
             <!-- Profile Header -->
             <div class="profile-header">
-                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120&h=120&fit=crop&crop=face" alt="Alex Johnson" class="profile-avatar">
-                <h1 class="profile-name">Alex Johnson</h1>
-                <div class="profile-role">
-                    <i class="fas fa-hat-chef"></i>
-                    Professional Chef
+                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120&h=120&fit=crop&crop=face" alt="User Profile" class="profile-avatar" id="profileAvatar">
+                <h1 class="profile-name" id="profileName">Loading...</h1>
+                <div class="profile-role" id="profileRole">
+                    <i class="fas fa-user"></i>
+                    <span id="roleText">User</span>
                 </div>
-                <p class="profile-bio">
-                    Passionate chef with 10+ years of experience creating innovative dishes that blend traditional techniques with modern flavors. Love sharing my culinary journey with fellow food enthusiasts!
+                <p class="profile-bio" id="profileBio">
+                    Loading bio...
                 </p>
                 <div class="profile-stats">
                     <div class="stat-item">
-                        <div class="stat-number">47</div>
+                        <div class="stat-number" id="recipeCount">0</div>
                         <div class="stat-label">Recipes</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-number">2.3K</div>
+                        <div class="stat-number" id="followerCount">0</div>
                         <div class="stat-label">Followers</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-number">892</div>
+                        <div class="stat-number" id="followingCount">0</div>
                         <div class="stat-label">Following</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-number">15K</div>
+                        <div class="stat-number" id="likeCount">0</div>
                         <div class="stat-label">Likes</div>
                     </div>
                 </div>
                 <div class="profile-actions">
-                    <button class="btn btn-outline">
-                        <i class="fas fa-edit"></i>
-                        Edit Profile
-                    </button>
-                    <button class="btn btn-outline">
+                    <button class="btn btn-outline" onclick="shareProfile()">
                         <i class="fas fa-share"></i>
                         Share Profile
                     </button>
@@ -809,70 +809,10 @@
                             <i class="fas fa-utensils"></i>
                             My Recipes
                         </h2>
-                        <div class="recipe-grid">
-                            <div class="recipe-card">
-                                <h4>Rainbow Buddha Bowl</h4>
-                                <div class="recipe-meta">
-                                    <div class="recipe-stats">
-                                        <div class="recipe-stat">
-                                            <i class="fas fa-heart"></i>
-                                            <span>124</span>
-                                        </div>
-                                        <div class="recipe-stat">
-                                            <i class="fas fa-comment"></i>
-                                            <span>18</span>
-                                        </div>
-                                    </div>
-                                    <span>2 days ago</span>
-                                </div>
-                            </div>
-                            <div class="recipe-card">
-                                <h4>Spicy Seafood Pasta</h4>
-                                <div class="recipe-meta">
-                                    <div class="recipe-stats">
-                                        <div class="recipe-stat">
-                                            <i class="fas fa-heart"></i>
-                                            <span>89</span>
-                                        </div>
-                                        <div class="recipe-stat">
-                                            <i class="fas fa-comment"></i>
-                                            <span>12</span>
-                                        </div>
-                                    </div>
-                                    <span>1 week ago</span>
-                                </div>
-                            </div>
-                            <div class="recipe-card">
-                                <h4>Chocolate Lava Cake</h4>
-                                <div class="recipe-meta">
-                                    <div class="recipe-stats">
-                                        <div class="recipe-stat">
-                                            <i class="fas fa-heart"></i>
-                                            <span>156</span>
-                                        </div>
-                                        <div class="recipe-stat">
-                                            <i class="fas fa-comment"></i>
-                                            <span>24</span>
-                                        </div>
-                                    </div>
-                                    <span>2 weeks ago</span>
-                                </div>
-                            </div>
-                            <div class="recipe-card">
-                                <h4>Asian Fusion Tacos</h4>
-                                <div class="recipe-meta">
-                                    <div class="recipe-stats">
-                                        <div class="recipe-stat">
-                                            <i class="fas fa-heart"></i>
-                                            <span>203</span>
-                                        </div>
-                                        <div class="recipe-stat">
-                                            <i class="fas fa-comment"></i>
-                                            <span>31</span>
-                                        </div>
-                                    </div>
-                                    <span>3 weeks ago</span>
-                                </div>
+                        <div class="recipe-grid" id="userRecipes">
+                            <!-- Recipes will be loaded here dynamically -->
+                            <div class="empty-state">
+                                <p>No recipes found. Add your first recipe!</p>
                             </div>
                         </div>
                     </div>
@@ -886,32 +826,14 @@
                             <i class="fas fa-trophy"></i>
                             Achievements
                         </h3>
-                        <div class="achievement-grid">
+                        <div class="achievement-grid" id="userAchievements">
                             <div class="achievement-card">
                                 <div class="achievement-icon">
                                     <i class="fas fa-fire"></i>
                                 </div>
                                 <div class="achievement-info">
-                                    <h4>Recipe Master</h4>
-                                    <p>Created 50+ recipes</p>
-                                </div>
-                            </div>
-                            <div class="achievement-card">
-                                <div class="achievement-icon">
-                                    <i class="fas fa-heart"></i>
-                                </div>
-                                <div class="achievement-info">
-                                    <h4>Community Favorite</h4>
-                                    <p>10K+ total likes</p>
-                                </div>
-                            </div>
-                            <div class="achievement-card">
-                                <div class="achievement-icon">
-                                    <i class="fas fa-users"></i>
-                                </div>
-                                <div class="achievement-info">
-                                    <h4>Influencer</h4>
-                                    <p>2K+ followers</p>
+                                    <h4>Newcomer</h4>
+                                    <p>Just getting started</p>
                                 </div>
                             </div>
                         </div>
@@ -923,41 +845,14 @@
                             <i class="fas fa-clock"></i>
                             Recent Activity
                         </h3>
-                        <div class="activity-feed">
+                        <div class="activity-feed" id="recentActivity">
                             <div class="activity-item">
                                 <div class="activity-icon">
-                                    <i class="fas fa-plus"></i>
+                                    <i class="fas fa-user"></i>
                                 </div>
                                 <div class="activity-content">
-                                    <div class="activity-text">Added a new recipe: Rainbow Buddha Bowl</div>
-                                    <div class="activity-time">2 days ago</div>
-                                </div>
-                            </div>
-                            <div class="activity-item">
-                                <div class="activity-icon">
-                                    <i class="fas fa-heart"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-text">Received 50 likes on Spicy Seafood Pasta</div>
-                                    <div class="activity-time">3 days ago</div>
-                                </div>
-                            </div>
-                            <div class="activity-item">
-                                <div class="activity-icon">
-                                    <i class="fas fa-comment"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-text">Replied to 5 comments on your recipes</div>
-                                    <div class="activity-time">1 week ago</div>
-                                </div>
-                            </div>
-                            <div class="activity-item">
-                                <div class="activity-icon">
-                                    <i class="fas fa-trophy"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-text">Earned "Recipe Master" achievement</div>
-                                    <div class="activity-time">2 weeks ago</div>
+                                    <div class="activity-text">Joined FoodieHive</div>
+                                    <div class="activity-time">Just now</div>
                                 </div>
                             </div>
                         </div>
@@ -992,6 +887,198 @@
     </nav>
 
     <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyA3RPDDpIbLUdPRkJpHtkqap7VwxxApwgk",
+            authDomain: "foodiehive-a6f18.firebaseapp.com",
+            projectId: "foodiehive-a6f18",
+            storageBucket: "foodiehive-a6f18.firebasestorage.app",
+            messagingSenderId: "1004100513391",
+            appId: "1:1004100513391:web:650ee3533bf8b5e289e79a",
+            measurementId: "G-P071E6HP43"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Function to fetch user data
+        function fetchUserData() {
+            const user = auth.currentUser;
+            
+            if (user) {
+                // Get user document from Firestore
+                db.collection("users").doc(user.uid).get()
+                    .then((doc) => {
+                        if (doc.exists) {
+                            const userData = doc.data();
+                            
+                            // Update profile header
+                            document.getElementById("profileName").textContent = 
+                                `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || user.email;
+                            
+                            document.getElementById("profileBio").textContent = 
+                                userData.bio || "No bio yet. Tell us about yourself!";
+                            
+                            document.getElementById("roleText").textContent = 
+                                userData.role || "User";
+                            
+                            // Update stats (you'll need to implement these queries)
+                            // For now, we'll use placeholder values
+                            document.getElementById("recipeCount").textContent = 
+                                userData.recipeCount || "0";
+                            document.getElementById("followerCount").textContent = 
+                                userData.followerCount || "0";
+                            document.getElementById("followingCount").textContent = 
+                                userData.followingCount || "0";
+                            document.getElementById("likeCount").textContent = 
+                                userData.likeCount || "0";
+                            
+                            // You can also update the profile picture if stored in Firestore
+                            // if (userData.photoURL) {
+                            //     document.getElementById("profileAvatar").src = userData.photoURL;
+                            // }
+                            
+                            // Load user recipes
+                            loadUserRecipes(user.uid);
+                            
+                            // Load achievements
+                            loadUserAchievements(user.uid);
+                            
+                            // Load recent activity
+                            loadRecentActivity(user.uid);
+                        } else {
+                            console.log("No such document!");
+                        }
+                    })
+                    .catch((error) => {
+                        console.log("Error getting document:", error);
+                    });
+            } else {
+                // User not logged in, redirect to login page
+                window.location.href = "index.html";
+            }
+        }
+
+        // Function to load user recipes
+        function loadUserRecipes(userId) {
+            db.collection("recipes").where("userId", "==", userId).limit(4).get()
+                .then((querySnapshot) => {
+                    const recipesContainer = document.getElementById("userRecipes");
+                    recipesContainer.innerHTML = ""; // Clear loading state
+                    
+                    if (querySnapshot.empty) {
+                        recipesContainer.innerHTML = `
+                            <div class="empty-state">
+                                <p>No recipes found. Add your first recipe!</p>
+                                <a href="add-recipe.html" class="btn btn-secondary" style="margin-top: 10px;">
+                                    <i class="fas fa-plus"></i>
+                                    Add Recipe
+                                </a>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    querySnapshot.forEach((doc) => {
+                        const recipe = doc.data();
+                        recipesContainer.innerHTML += `
+                            <div class="recipe-card" onclick="window.location.href='recipe.html?id=${doc.id}'">
+                                <h4>${recipe.title || "Untitled Recipe"}</h4>
+                                <div class="recipe-meta">
+                                    <div class="recipe-stats">
+                                        <div class="recipe-stat">
+                                            <i class="fas fa-heart"></i>
+                                            <span>${recipe.likes || 0}</span>
+                                        </div>
+                                        <div class="recipe-stat">
+                                            <i class="fas fa-comment"></i>
+                                            <span>${recipe.commentCount || 0}</span>
+                                        </div>
+                                    </div>
+                                    <span>${formatDate(recipe.createdAt)}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                })
+                .catch((error) => {
+                    console.log("Error getting recipes: ", error);
+                });
+        }
+
+        // Function to load user achievements
+        function loadUserAchievements(userId) {
+            // Placeholder - you'll need to implement your achievements logic
+            const achievementsContainer = document.getElementById("userAchievements");
+            achievementsContainer.innerHTML = `
+                <div class="achievement-card">
+                    <div class="achievement-icon">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <div class="achievement-info">
+                        <h4>Newcomer</h4>
+                        <p>Just getting started</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Function to load recent activity
+        function loadRecentActivity(userId) {
+            // Placeholder - you'll need to implement your activity feed logic
+            const activityContainer = document.getElementById("recentActivity");
+            activityContainer.innerHTML = `
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-text">Joined FoodieHive</div>
+                        <div class="activity-time">Just now</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Helper function to format date
+        function formatDate(timestamp) {
+            if (!timestamp) return "Recently";
+            
+            const date = timestamp.toDate();
+            const now = new Date();
+            const diffInDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+            
+            if (diffInDays === 0) return "Today";
+            if (diffInDays === 1) return "Yesterday";
+            if (diffInDays < 7) return `${diffInDays} days ago`;
+            if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} weeks ago`;
+            
+            return date.toLocaleDateString();
+        }
+
+        // Share profile function
+        function shareProfile() {
+            const user = auth.currentUser;
+            if (user) {
+                const profileUrl = `${window.location.origin}/profile.html?uid=${user.uid}`;
+                
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'Check out my FoodieHive profile',
+                        text: `View my recipes and culinary creations on FoodieHive!`,
+                        url: profileUrl,
+                    })
+                    .catch((error) => console.log('Error sharing:', error));
+                } else {
+                    // Fallback for browsers that don't support Web Share API
+                    prompt("Copy this link to share your profile:", profileUrl);
+                }
+            }
+        }
+
+        // Toggle functions for mobile menu and profile dropdown
         function toggleMobileMenu() {
             const mobileMenu = document.getElementById("mobileMenu");
             mobileMenu.classList.toggle("show");
@@ -1015,6 +1102,15 @@
 
             if (!profileBtn.contains(event.target) && !profileMenu.contains(event.target)) {
                 profileMenu.classList.remove("show");
+            }
+        });
+
+        // Check auth state and load data when page loads
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                fetchUserData();
+            } else {
+                window.location.href = "index.html";
             }
         });
     </script>
