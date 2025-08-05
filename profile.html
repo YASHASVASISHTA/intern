@@ -383,12 +383,18 @@
 
         .stat-item {
             text-align: center;
+            cursor: pointer;
+        }
+
+        .stat-item:hover .stat-number {
+            transform: scale(1.1);
         }
 
         .stat-number {
             font-size: 24px;
             font-weight: 700;
             margin-bottom: 4px;
+            transition: transform 0.3s ease;
         }
 
         .stat-label {
@@ -641,6 +647,102 @@
             font-size: 12px;
             font-weight: 600;
         }
+
+        /* Followers/Following Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        .user-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            transition: background-color 0.3s ease;
+        }
+
+        .user-item:hover {
+            background-color: rgba(102, 126, 234, 0.1);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .user-name {
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .follow-btn {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .follow-btn.follow {
+            background-color: #667eea;
+            color: white;
+        }
+
+        .follow-btn.unfollow {
+            background-color: #e2e8f0;
+            color: #64748b;
+        }
     </style>
 </head>
 <body>
@@ -703,20 +805,19 @@
                 <!-- Profile Dropdown -->
                 <div class="profile-dropdown">
                     <button class="profile-btn" onclick="toggleProfileMenu()">
-                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face" alt="Profile">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face" alt="Profile" id="headerProfilePic">
                     </button>
                     <div class="dropdown-menu" id="profileMenu">
                         <a href="profile.html">
                             <i class="fas fa-user"></i>
                             Profile
                         </a>
-                       
                         <a href="settings.html">
                             <i class="fas fa-cog"></i>
                             Settings
                         </a>
                         <hr>
-                        <a href="index.html">
+                        <a href="index.html" onclick="logout()">
                             <i class="fas fa-sign-out-alt"></i>
                             Logout
                         </a>
@@ -771,15 +872,15 @@
                     Loading bio...
                 </p>
                 <div class="profile-stats">
-                    <div class="stat-item">
+                    <div class="stat-item" onclick="showFollowers()">
                         <div class="stat-number" id="recipeCount">0</div>
                         <div class="stat-label">Recipes</div>
                     </div>
-                    <div class="stat-item">
+                    <div class="stat-item" onclick="showFollowers()">
                         <div class="stat-number" id="followerCount">0</div>
                         <div class="stat-label">Followers</div>
                     </div>
-                    <div class="stat-item">
+                    <div class="stat-item" onclick="showFollowing()">
                         <div class="stat-number" id="followingCount">0</div>
                         <div class="stat-label">Following</div>
                     </div>
@@ -792,6 +893,10 @@
                     <button class="btn btn-outline" onclick="shareProfile()">
                         <i class="fas fa-share"></i>
                         Share Profile
+                    </button>
+                    <button class="btn btn-secondary" id="followButton" style="display: none;">
+                        <i class="fas fa-user-plus"></i>
+                        <span id="followButtonText">Follow</span>
                     </button>
                 </div>
             </div>
@@ -859,6 +964,19 @@
         </div>
     </main>
 
+    <!-- Followers/Following Modal -->
+    <div class="modal" id="followModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Followers</h3>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="user-list" id="userList">
+                <!-- Users will be loaded here dynamically -->
+            </div>
+        </div>
+    </div>
+
     <!-- Mobile Bottom Navigation -->
     <nav class="mobile-bottom-nav">
         <a href="home.html" class="nav-item">
@@ -900,20 +1018,43 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
+        // Global variables
+        let currentUserId = null;
+        let profileUserId = null; // The user whose profile is being viewed
+        let isFollowing = false;
+
         // Function to fetch user data
         function fetchUserData() {
             const user = auth.currentUser;
             
             if (user) {
+                currentUserId = user.uid;
+                
+                // Update header profile picture with Google photo
+                if (user.photoURL) {
+                    document.getElementById("headerProfilePic").src = user.photoURL;
+                }
+                
+                // Get profile user ID from URL or use current user
+                const urlParams = new URLSearchParams(window.location.search);
+                profileUserId = urlParams.get('uid') || user.uid;
+                
+                // Check if viewing own profile or someone else's
+                const isOwnProfile = (profileUserId === currentUserId);
+                
+                // Hide follow button if viewing own profile
+                const followButton = document.getElementById("followButton");
+                followButton.style.display = isOwnProfile ? "none" : "block";
+                
                 // Get user document from Firestore
-                db.collection("users").doc(user.uid).get()
+                db.collection("users").doc(profileUserId).get()
                     .then((doc) => {
                         if (doc.exists) {
                             const userData = doc.data();
                             
                             // Update profile header
                             document.getElementById("profileName").textContent = 
-                                `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || user.email;
+                                `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || userData.email;
                             
                             document.getElementById("profileBio").textContent = 
                                 userData.bio || "No bio yet. Tell us about yourself!";
@@ -921,30 +1062,29 @@
                             document.getElementById("roleText").textContent = 
                                 userData.role || "User";
                             
-                            // Update stats (you'll need to implement these queries)
-                            // For now, we'll use placeholder values
-                            document.getElementById("recipeCount").textContent = 
-                                userData.recipeCount || "0";
-                            document.getElementById("followerCount").textContent = 
-                                userData.followerCount || "0";
-                            document.getElementById("followingCount").textContent = 
-                                userData.followingCount || "0";
-                            document.getElementById("likeCount").textContent = 
-                                userData.likeCount || "0";
+                            // Use Google profile picture if available
+                            if (userData.photoURL) {
+                                document.getElementById("profileAvatar").src = userData.photoURL;
+                            } else if (user.photoURL && isOwnProfile) {
+                                document.getElementById("profileAvatar").src = user.photoURL;
+                            }
                             
-                            // You can also update the profile picture if stored in Firestore
-                            // if (userData.photoURL) {
-                            //     document.getElementById("profileAvatar").src = userData.photoURL;
-                            // }
+                            // Load stats
+                            loadUserStats(profileUserId);
                             
                             // Load user recipes
-                            loadUserRecipes(user.uid);
+                            loadUserRecipes(profileUserId);
                             
                             // Load achievements
-                            loadUserAchievements(user.uid);
+                            loadUserAchievements(profileUserId);
                             
                             // Load recent activity
-                            loadRecentActivity(user.uid);
+                            loadRecentActivity(profileUserId);
+                            
+                            // Check follow status if not own profile
+                            if (!isOwnProfile) {
+                                checkFollowStatus(currentUserId, profileUserId);
+                            }
                         } else {
                             console.log("No such document!");
                         }
@@ -958,9 +1098,40 @@
             }
         }
 
+        // Function to load user stats (followers, following, etc.)
+        function loadUserStats(userId) {
+            // Get recipe count
+            db.collection("recipes").where("userId", "==", userId).get()
+                .then((snapshot) => {
+                    document.getElementById("recipeCount").textContent = snapshot.size;
+                });
+            
+            // Get follower count
+            db.collection("followers").doc(userId).collection("userFollowers").get()
+                .then((snapshot) => {
+                    document.getElementById("followerCount").textContent = snapshot.size;
+                });
+            
+            // Get following count
+            db.collection("following").doc(userId).collection("userFollowing").get()
+                .then((snapshot) => {
+                    document.getElementById("followingCount").textContent = snapshot.size;
+                });
+            
+            // Get like count (sum of all recipe likes)
+            db.collection("recipes").where("userId", "==", userId).get()
+                .then((snapshot) => {
+                    let totalLikes = 0;
+                    snapshot.forEach(doc => {
+                        totalLikes += doc.data().likes || 0;
+                    });
+                    document.getElementById("likeCount").textContent = totalLikes;
+                });
+        }
+
         // Function to load user recipes
         function loadUserRecipes(userId) {
-            db.collection("recipes").where("userId", "==", userId).limit(4).get()
+            db.collection("recipes").where("userId", "==", userId).orderBy("createdAt", "desc").limit(4).get()
                 .then((querySnapshot) => {
                     const recipesContainer = document.getElementById("userRecipes");
                     recipesContainer.innerHTML = ""; // Clear loading state
@@ -1039,6 +1210,270 @@
             `;
         }
 
+        // Function to check if current user is following profile user
+        function checkFollowStatus(currentUserId, profileUserId) {
+            db.collection("following").doc(currentUserId).collection("userFollowing")
+                .doc(profileUserId).get()
+                .then((doc) => {
+                    const followButton = document.getElementById("followButton");
+                    const followButtonText = document.getElementById("followButtonText");
+                    
+                    if (doc.exists) {
+                        isFollowing = true;
+                        followButtonText.textContent = "Following";
+                        followButton.classList.add("btn-outline");
+                        followButton.classList.remove("btn-secondary");
+                    } else {
+                        isFollowing = false;
+                        followButtonText.textContent = "Follow";
+                        followButton.classList.add("btn-secondary");
+                        followButton.classList.remove("btn-outline");
+                    }
+                    
+                    // Add click event to follow button
+                    followButton.onclick = () => toggleFollow(currentUserId, profileUserId);
+                })
+                .catch((error) => {
+                    console.log("Error checking follow status: ", error);
+                });
+        }
+
+        // Function to toggle follow status
+        function toggleFollow(currentUserId, profileUserId) {
+            const followButton = document.getElementById("followButton");
+            const followButtonText = document.getElementById("followButtonText");
+            
+            if (isFollowing) {
+                // Unfollow
+                const batch = db.batch();
+                
+                // Remove from current user's following list
+                const followingRef = db.collection("following").doc(currentUserId)
+                    .collection("userFollowing").doc(profileUserId);
+                batch.delete(followingRef);
+                
+                // Remove from profile user's followers list
+                const followerRef = db.collection("followers").doc(profileUserId)
+                    .collection("userFollowers").doc(currentUserId);
+                batch.delete(followerRef);
+                
+                batch.commit()
+                    .then(() => {
+                        isFollowing = false;
+                        followButtonText.textContent = "Follow";
+                        followButton.classList.add("btn-secondary");
+                        followButton.classList.remove("btn-outline");
+                        
+                        // Update follower count
+                        loadUserStats(profileUserId);
+                    })
+                    .catch((error) => {
+                        console.log("Error unfollowing user: ", error);
+                    });
+            } else {
+                // Follow
+                const batch = db.batch();
+                
+                // Add to current user's following list
+                const followingRef = db.collection("following").doc(currentUserId)
+                    .collection("userFollowing").doc(profileUserId);
+                batch.set(followingRef, {
+                    userId: profileUserId,
+                    followedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                // Add to profile user's followers list
+                const followerRef = db.collection("followers").doc(profileUserId)
+                    .collection("userFollowers").doc(currentUserId);
+                batch.set(followerRef, {
+                    userId: currentUserId,
+                    followedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                batch.commit()
+                    .then(() => {
+                        isFollowing = true;
+                        followButtonText.textContent = "Following";
+                        followButton.classList.add("btn-outline");
+                        followButton.classList.remove("btn-secondary");
+                        
+                        // Update follower count
+                        loadUserStats(profileUserId);
+                    })
+                    .catch((error) => {
+                        console.log("Error following user: ", error);
+                    });
+            }
+        }
+
+        // Function to show followers modal
+        function showFollowers() {
+            const modal = document.getElementById("followModal");
+            const modalTitle = document.getElementById("modalTitle");
+            const userList = document.getElementById("userList");
+            
+            modalTitle.textContent = "Followers";
+            userList.innerHTML = "<p>Loading followers...</p>";
+            
+            // Show modal
+            modal.style.display = "flex";
+            
+            // Load followers
+            db.collection("followers").doc(profileUserId).collection("userFollowers").get()
+                .then((snapshot) => {
+                    userList.innerHTML = "";
+                    
+                    if (snapshot.empty) {
+                        userList.innerHTML = "<p>No followers yet</p>";
+                        return;
+                    }
+                    
+                    snapshot.forEach((doc) => {
+                        const followerId = doc.id;
+                        loadUserListItem(followerId, userList, false);
+                    });
+                })
+                .catch((error) => {
+                    console.log("Error loading followers: ", error);
+                    userList.innerHTML = "<p>Error loading followers</p>";
+                });
+        }
+
+        // Function to show following modal
+        function showFollowing() {
+            const modal = document.getElementById("followModal");
+            const modalTitle = document.getElementById("modalTitle");
+            const userList = document.getElementById("userList");
+            
+            modalTitle.textContent = "Following";
+            userList.innerHTML = "<p>Loading following...</p>";
+            
+            // Show modal
+            modal.style.display = "flex";
+            
+            // Load following
+            db.collection("following").doc(profileUserId).collection("userFollowing").get()
+                .then((snapshot) => {
+                    userList.innerHTML = "";
+                    
+                    if (snapshot.empty) {
+                        userList.innerHTML = "<p>Not following anyone yet</p>";
+                        return;
+                    }
+                    
+                    snapshot.forEach((doc) => {
+                        const followingId = doc.id;
+                        loadUserListItem(followingId, userList, true);
+                    });
+                })
+                .catch((error) => {
+                    console.log("Error loading following: ", error);
+                    userList.innerHTML = "<p>Error loading following</p>";
+                });
+        }
+
+        // Function to load user list item
+        function loadUserListItem(userId, container, isFollowingList) {
+            db.collection("users").doc(userId).get()
+                .then((doc) => {
+                    if (doc.exists) {
+                        const userData = doc.data();
+                        const userName = `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || userData.email;
+                        const userPhoto = userData.photoURL || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face";
+                        
+                        const userItem = document.createElement("div");
+                        userItem.className = "user-item";
+                        userItem.innerHTML = `
+                            <img src="${userPhoto}" alt="${userName}" class="user-avatar">
+                            <div class="user-name">${userName}</div>
+                            ${currentUserId !== userId ? 
+                                `<button class="follow-btn ${isFollowingList ? 'unfollow' : 'follow'}" 
+                                    onclick="toggleFollowListItem('${userId}', this)">
+                                    ${isFollowingList ? 'Following' : 'Follow'}
+                                </button>` : ''
+                            }
+                        `;
+                        
+                        container.appendChild(userItem);
+                    }
+                })
+                .catch((error) => {
+                    console.log("Error loading user data: ", error);
+                });
+        }
+
+        // Function to toggle follow from list item
+        function toggleFollowListItem(userId, button) {
+            if (button.textContent === "Follow") {
+                // Follow user
+                const batch = db.batch();
+                
+                // Add to current user's following list
+                const followingRef = db.collection("following").doc(currentUserId)
+                    .collection("userFollowing").doc(userId);
+                batch.set(followingRef, {
+                    userId: userId,
+                    followedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                // Add to target user's followers list
+                const followerRef = db.collection("followers").doc(userId)
+                    .collection("userFollowers").doc(currentUserId);
+                batch.set(followerRef, {
+                    userId: currentUserId,
+                    followedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                batch.commit()
+                    .then(() => {
+                        button.textContent = "Following";
+                        button.classList.add("unfollow");
+                        button.classList.remove("follow");
+                        
+                        // Update follower count if on own profile
+                        if (profileUserId === currentUserId) {
+                            loadUserStats(profileUserId);
+                        }
+                    })
+                    .catch((error) => {
+                        console.log("Error following user: ", error);
+                    });
+            } else {
+                // Unfollow user
+                const batch = db.batch();
+                
+                // Remove from current user's following list
+                const followingRef = db.collection("following").doc(currentUserId)
+                    .collection("userFollowing").doc(userId);
+                batch.delete(followingRef);
+                
+                // Remove from target user's followers list
+                const followerRef = db.collection("followers").doc(userId)
+                    .collection("userFollowers").doc(currentUserId);
+                batch.delete(followerRef);
+                
+                batch.commit()
+                    .then(() => {
+                        button.textContent = "Follow";
+                        button.classList.add("follow");
+                        button.classList.remove("unfollow");
+                        
+                        // Update follower count if on own profile
+                        if (profileUserId === currentUserId) {
+                            loadUserStats(profileUserId);
+                        }
+                    })
+                    .catch((error) => {
+                        console.log("Error unfollowing user: ", error);
+                    });
+            }
+        }
+
+        // Function to close modal
+        function closeModal() {
+            document.getElementById("followModal").style.display = "none";
+        }
+
         // Helper function to format date
         function formatDate(timestamp) {
             if (!timestamp) return "Recently";
@@ -1057,22 +1492,28 @@
 
         // Share profile function
         function shareProfile() {
-            const user = auth.currentUser;
-            if (user) {
-                const profileUrl = `${window.location.origin}/profile.html?uid=${user.uid}`;
-                
-                if (navigator.share) {
-                    navigator.share({
-                        title: 'Check out my FoodieHive profile',
-                        text: `View my recipes and culinary creations on FoodieHive!`,
-                        url: profileUrl,
-                    })
-                    .catch((error) => console.log('Error sharing:', error));
-                } else {
-                    // Fallback for browsers that don't support Web Share API
-                    prompt("Copy this link to share your profile:", profileUrl);
-                }
+            const profileUrl = `${window.location.origin}/profile.html?uid=${profileUserId}`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Check out my FoodieHive profile',
+                    text: `View my recipes and culinary creations on FoodieHive!`,
+                    url: profileUrl,
+                })
+                .catch((error) => console.log('Error sharing:', error));
+            } else {
+                // Fallback for browsers that don't support Web Share API
+                prompt("Copy this link to share your profile:", profileUrl);
             }
+        }
+
+        // Logout function
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = "index.html";
+            }).catch((error) => {
+                console.log("Error signing out: ", error);
+            });
         }
 
         // Toggle functions for mobile menu and profile dropdown
@@ -1099,6 +1540,13 @@
 
             if (!profileBtn.contains(event.target) && !profileMenu.contains(event.target)) {
                 profileMenu.classList.remove("show");
+            }
+        });
+
+        // Close modal when clicking outside
+        document.getElementById("followModal").addEventListener("click", (event) => {
+            if (event.target === document.getElementById("followModal")) {
+                closeModal();
             }
         });
 
