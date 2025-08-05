@@ -370,6 +370,44 @@
             }
         }
 
+        /* Community Selection */
+        .community-selection {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            scrollbar-width: none; /* Firefox */
+        }
+
+        .community-selection::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+
+        .community-tab {
+            padding: 10px 20px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .community-tab:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .community-tab.active {
+            background: white;
+            color: #667eea;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
         /* Main Feed */
         .main-feed {
             display: flex;
@@ -517,6 +555,17 @@
             font-weight: 600;
         }
 
+        .post-community {
+            background: rgba(240, 147, 251, 0.1);
+            color: #f5576c;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
         .post-actions {
             display: flex;
             justify-content: space-between;
@@ -585,6 +634,78 @@
 
         .sidebar-title i {
             color: #667eea;
+        }
+
+        /* Users to Follow */
+        .users-to-follow {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 8px;
+        }
+
+        .user-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-info h5 {
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 2px;
+        }
+
+        .user-info span {
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .follow-btn {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .follow-btn.follow {
+            background-color: #667eea;
+            color: white;
+        }
+
+        .follow-btn.follow:hover {
+            background-color: #5a6fd1;
+        }
+
+        .follow-btn.following {
+            background-color: #e2e8f0;
+            color: #64748b;
+        }
+
+        .follow-btn.following:hover {
+            background-color: #d1d8e0;
         }
 
         /* Trending Topics */
@@ -890,6 +1011,22 @@
             <div class="community-layout">
                 <!-- Main Feed -->
                 <div class="main-feed">
+                    <!-- Community Selection -->
+                    <div class="community-selection">
+                        <div class="community-tab active" data-community="all" onclick="switchCommunity('all')">
+                            <i class="fas fa-globe"></i> All Communities
+                        </div>
+                        <div class="community-tab" data-community="homecooks" onclick="switchCommunity('homecooks')">
+                            <i class="fas fa-home"></i> Home Cooks
+                        </div>
+                        <div class="community-tab" data-community="bakers" onclick="switchCommunity('bakers')">
+                            <i class="fas fa-birthday-cake"></i> Bakers
+                        </div>
+                        <div class="community-tab" data-community="chefs" onclick="switchCommunity('chefs')">
+                            <i class="fas fa-utensils"></i> Professional Chefs
+                        </div>
+                    </div>
+
                     <!-- Create Post -->
                     <div class="create-post">
                         <div class="create-post-header">
@@ -932,6 +1069,20 @@
 
                 <!-- Sidebar -->
                 <div class="sidebar">
+                    <!-- Users to Follow -->
+                    <div class="sidebar-card">
+                        <div class="sidebar-title">
+                            <i class="fas fa-user-plus"></i>
+                            Users to Follow
+                        </div>
+                        <div class="users-to-follow" id="usersToFollow">
+                            <div style="text-align: center; padding: 20px;">
+                                <i class="fas fa-spinner fa-spin" style="font-size: 18px; color: #667eea;"></i>
+                                <p>Loading users...</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Trending Topics -->
                     <div class="sidebar-card">
                         <div class="sidebar-title">
@@ -1060,8 +1211,10 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
 
-        // Current user data
+        // Current user data and state
         let currentUser = null;
+        let currentCommunity = 'all';
+        let usersList = [];
 
         // Initialize the app when the page loads
         document.addEventListener("DOMContentLoaded", () => {
@@ -1080,8 +1233,12 @@
                     document.getElementById('profileImage').src = currentUser.photoURL;
                     document.getElementById('currentUserImage').src = currentUser.photoURL;
                     
-                    // Load community posts
+                    // Load initial data
                     loadCommunityPosts();
+                    loadUsersToFollow();
+                    
+                    // Seed initial posts if needed
+                    seedInitialPosts();
                 } else {
                     // No user is signed in, redirect to login
                     window.location.href = 'index.html';
@@ -1089,81 +1246,234 @@
             });
         });
 
+        // Switch between communities
+        function switchCommunity(community) {
+            currentCommunity = community;
+            
+            // Update active tab
+            document.querySelectorAll('.community-tab').forEach(tab => {
+                if (tab.dataset.community === community) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            
+            // Reload posts
+            loadCommunityPosts();
+        }
+
         // Load community posts from Firestore
         function loadCommunityPosts() {
             const postsContainer = document.getElementById("communityPosts");
             
             // Clear loading message
-            postsContainer.innerHTML = '';
+            postsContainer.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin" style="font-size: 24px; color: #667eea;"></i><p>Loading posts...</p></div>';
             
-            // Get posts from Firestore, ordered by timestamp
-            db.collection("communityPosts")
-                .orderBy("timestamp", "desc")
-                .onSnapshot((querySnapshot) => {
-                    postsContainer.innerHTML = '';
+            // Create query based on selected community
+            let query = db.collection("communityPosts")
+                .orderBy("timestamp", "desc");
+            
+            if (currentCommunity !== 'all') {
+                query = query.where("community", "==", currentCommunity);
+            }
+            
+            // Get posts from Firestore
+            query.onSnapshot((querySnapshot) => {
+                postsContainer.innerHTML = '';
+                
+                if (querySnapshot.empty) {
+                    postsContainer.innerHTML = `
+                        <div style="text-align: center; padding: 40px;">
+                            <i class="fas fa-comments" style="font-size: 24px; color: #667eea;"></i>
+                            <p>No posts yet in this community. Be the first to share!</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                querySnapshot.forEach((doc) => {
+                    const post = doc.data();
+                    const postId = doc.id;
+                    const postDate = post.timestamp ? post.timestamp.toDate() : new Date();
+                    const timeAgo = getTimeAgo(postDate);
+                    
+                    // Check if current user has liked this post
+                    const hasLiked = post.likes && post.likes.includes(currentUser.uid);
+                    
+                    // Create post HTML
+                    const postElement = document.createElement('div');
+                    postElement.className = 'community-post';
+                    postElement.innerHTML = `
+                        ${post.community ? `<div class="post-community">${getCommunityName(post.community)}</div>` : ''}
+                        <div class="post-header">
+                            <img src="${post.userPhotoURL || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&h=50&fit=crop&crop=face'}" alt="${post.userName}" class="post-avatar">
+                            <div class="post-user-info">
+                                <h4>${post.userName}</h4>
+                                <div class="post-time">${timeAgo}</div>
+                            </div>
+                        </div>
+                        <div class="post-content">
+                            ${post.content}
+                        </div>
+                        ${post.imageUrl ? `<img src="${post.imageUrl}" alt="Post image" class="post-image">` : ''}
+                        ${post.tags && post.tags.length > 0 ? `
+                            <div class="post-tags">
+                                ${post.tags.map(tag => `<span class="post-tag">${tag}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                        <div class="post-actions">
+                            <div class="post-engagement">
+                                <button class="engagement-btn ${hasLiked ? 'liked' : ''}" onclick="toggleLike('${postId}', this)">
+                                    <i class="fas fa-heart"></i>
+                                    <span>${post.likes ? post.likes.length : 0}</span>
+                                </button>
+                                <button class="engagement-btn" onclick="showComments('${postId}')">
+                                    <i class="fas fa-comment"></i>
+                                    <span>${post.comments ? post.comments.length : 0}</span>
+                                </button>
+                                <button class="engagement-btn" onclick="sharePost('${postId}')">
+                                    <i class="fas fa-share"></i>
+                                    <span>${post.shares || 0}</span>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    postsContainer.appendChild(postElement);
+                });
+            }, (error) => {
+                showAlert('error', 'Error loading posts: ' + error.message);
+            });
+        }
+
+        // Get community display name
+        function getCommunityName(communityId) {
+            const communities = {
+                'homecooks': 'Home Cooks Community',
+                'bakers': 'Bakers Community',
+                'chefs': 'Professional Chefs Community'
+            };
+            return communities[communityId] || communityId;
+        }
+
+        // Load users to follow
+        function loadUsersToFollow() {
+            const usersContainer = document.getElementById("usersToFollow");
+            
+            // Clear loading message
+            usersContainer.innerHTML = '<div style="text-align: center; padding: 20px;"><i class="fas fa-spinner fa-spin" style="font-size: 18px; color: #667eea;"></i><p>Loading users...</p></div>';
+            
+            // Get all users except current user
+            db.collection("users").where("uid", "!=", currentUser.uid).limit(10).get()
+                .then((querySnapshot) => {
+                    usersList = [];
+                    usersContainer.innerHTML = '';
                     
                     if (querySnapshot.empty) {
-                        postsContainer.innerHTML = `
-                            <div style="text-align: center; padding: 40px;">
-                                <i class="fas fa-comments" style="font-size: 24px; color: #667eea;"></i>
-                                <p>No posts yet. Be the first to share!</p>
-                            </div>
-                        `;
+                        usersContainer.innerHTML = '<p>No other users found</p>';
                         return;
                     }
                     
                     querySnapshot.forEach((doc) => {
-                        const post = doc.data();
-                        const postId = doc.id;
-                        const postDate = post.timestamp ? post.timestamp.toDate() : new Date();
-                        const timeAgo = getTimeAgo(postDate);
+                        const user = doc.data();
+                        usersList.push(user);
                         
-                        // Check if current user has liked this post
-                        const hasLiked = post.likes && post.likes.includes(currentUser.uid);
-                        
-                        // Create post HTML
-                        const postElement = document.createElement('div');
-                        postElement.className = 'community-post';
-                        postElement.innerHTML = `
-                            <div class="post-header">
-                                <img src="${post.userPhotoURL || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&h=50&fit=crop&crop=face'}" alt="${post.userName}" class="post-avatar">
-                                <div class="post-user-info">
-                                    <h4>${post.userName}</h4>
-                                    <div class="post-time">${timeAgo}</div>
+                        // Check if current user is following this user
+                        checkFollowingStatus(user.uid).then(isFollowing => {
+                            const userElement = document.createElement('div');
+                            userElement.className = 'user-item';
+                            userElement.innerHTML = `
+                                <img src="${user.photoURL || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face'}" 
+                                     alt="${user.displayName}" class="user-avatar">
+                                <div class="user-info">
+                                    <h5>${user.displayName}</h5>
+                                    <span>${user.bio || 'Food enthusiast'}</span>
                                 </div>
-                            </div>
-                            <div class="post-content">
-                                ${post.content}
-                            </div>
-                            ${post.imageUrl ? `<img src="${post.imageUrl}" alt="Post image" class="post-image">` : ''}
-                            ${post.tags && post.tags.length > 0 ? `
-                                <div class="post-tags">
-                                    ${post.tags.map(tag => `<span class="post-tag">${tag}</span>`).join('')}
-                                </div>
-                            ` : ''}
-                            <div class="post-actions">
-                                <div class="post-engagement">
-                                    <button class="engagement-btn ${hasLiked ? 'liked' : ''}" onclick="toggleLike('${postId}', this)">
-                                        <i class="fas fa-heart"></i>
-                                        <span>${post.likes ? post.likes.length : 0}</span>
-                                    </button>
-                                    <button class="engagement-btn" onclick="showComments('${postId}')">
-                                        <i class="fas fa-comment"></i>
-                                        <span>${post.comments ? post.comments.length : 0}</span>
-                                    </button>
-                                    <button class="engagement-btn" onclick="sharePost('${postId}')">
-                                        <i class="fas fa-share"></i>
-                                        <span>${post.shares || 0}</span>
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                        
-                        postsContainer.appendChild(postElement);
+                                <button class="follow-btn ${isFollowing ? 'following' : 'follow'}" 
+                                        onclick="toggleFollow('${user.uid}', this)">
+                                    ${isFollowing ? 'Following' : 'Follow'}
+                                </button>
+                            `;
+                            
+                            usersContainer.appendChild(userElement);
+                        });
                     });
-                }, (error) => {
-                    showAlert('error', 'Error loading posts: ' + error.message);
+                })
+                .catch((error) => {
+                    showAlert('error', 'Error loading users: ' + error.message);
                 });
+        }
+
+        // Check if current user is following another user
+        function checkFollowingStatus(targetUserId) {
+            return db.collection("following").doc(currentUser.uid)
+                .collection("userFollowing").doc(targetUserId).get()
+                .then(doc => doc.exists);
+        }
+
+        // Toggle follow status for a user
+        function toggleFollow(targetUserId, button) {
+            if (!currentUser) return;
+            
+            // Check current follow status
+            const isFollowing = button.textContent === 'Following';
+            
+            if (isFollowing) {
+                // Unfollow user
+                const batch = db.batch();
+                
+                // Remove from current user's following list
+                const followingRef = db.collection("following").doc(currentUser.uid)
+                    .collection("userFollowing").doc(targetUserId);
+                batch.delete(followingRef);
+                
+                // Remove from target user's followers list
+                const followerRef = db.collection("followers").doc(targetUserId)
+                    .collection("userFollowers").doc(currentUser.uid);
+                batch.delete(followerRef);
+                
+                batch.commit()
+                    .then(() => {
+                        button.textContent = 'Follow';
+                        button.classList.remove('following');
+                        button.classList.add('follow');
+                        showAlert('success', 'User unfollowed successfully');
+                    })
+                    .catch(error => {
+                        showAlert('error', 'Error unfollowing user: ' + error.message);
+                    });
+            } else {
+                // Follow user
+                const batch = db.batch();
+                
+                // Add to current user's following list
+                const followingRef = db.collection("following").doc(currentUser.uid)
+                    .collection("userFollowing").doc(targetUserId);
+                batch.set(followingRef, {
+                    userId: targetUserId,
+                    followedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                // Add to target user's followers list
+                const followerRef = db.collection("followers").doc(targetUserId)
+                    .collection("userFollowers").doc(currentUser.uid);
+                batch.set(followerRef, {
+                    userId: currentUser.uid,
+                    followedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                batch.commit()
+                    .then(() => {
+                        button.textContent = 'Following';
+                        button.classList.remove('follow');
+                        button.classList.add('following');
+                        showAlert('success', 'User followed successfully');
+                    })
+                    .catch(error => {
+                        showAlert('error', 'Error following user: ' + error.message);
+                    });
+            }
         }
 
         // Create a new post
@@ -1199,7 +1509,8 @@
                 likes: [],
                 comments: [],
                 shares: 0,
-                tags: tags
+                tags: tags,
+                community: currentCommunity === 'all' ? null : currentCommunity
             };
             
             // Add to Firestore
@@ -1266,6 +1577,61 @@
         // Share post (placeholder)
         function sharePost(postId) {
             alert(`Sharing post ${postId} - Share feature coming soon!`);
+        }
+
+        // Seed initial posts for communities
+        function seedInitialPosts() {
+            // Check if posts already exist
+            db.collection("communityPosts").limit(1).get()
+                .then(snapshot => {
+                    if (snapshot.empty) {
+                        // Add sample posts for each community
+                        const samplePosts = [
+                            {
+                                content: "Just made my first sourdough bread! Any tips for getting a better rise? #SourdoughTips #Baking",
+                                userName: "Maria Rodriguez",
+                                userPhotoURL: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=50&h=50&fit=crop&crop=face",
+                                userId: "user1",
+                                timestamp: firebase.firestore.Timestamp.fromDate(new Date(Date.now() - 3600000)),
+                                likes: ["user2", "user3"],
+                                tags: ["#SourdoughTips", "#Baking"],
+                                community: "homecooks"
+                            },
+                            {
+                                content: "Sharing my secret for perfect macarons - let the piped batter rest for 30 minutes before baking! #BakingTips #Macarons",
+                                userName: "Sarah Chen",
+                                userPhotoURL: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=50&h=50&fit=crop&crop=face",
+                                userId: "user2",
+                                timestamp: firebase.firestore.Timestamp.fromDate(new Date(Date.now() - 7200000)),
+                                likes: ["user1", "user4"],
+                                tags: ["#BakingTips", "#Macarons"],
+                                community: "bakers"
+                            },
+                            {
+                                content: "Pro tip: Always keep your knives sharp. A dull knife is more dangerous than a sharp one. #ChefLife #KitchenTips",
+                                userName: "David Kim",
+                                userPhotoURL: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face",
+                                userId: "user3",
+                                timestamp: firebase.firestore.Timestamp.fromDate(new Date(Date.now() - 10800000)),
+                                likes: ["user2"],
+                                tags: ["#ChefLife", "#KitchenTips"],
+                                community: "chefs"
+                            }
+                        ];
+                        
+                        // Add sample posts to Firestore
+                        const batch = db.batch();
+                        samplePosts.forEach(post => {
+                            const docRef = db.collection("communityPosts").doc();
+                            batch.set(docRef, post);
+                        });
+                        
+                        return batch.commit();
+                    }
+                })
+                .catch(error => {
+                    console.log("Error checking for existing posts: ", error);
+                });
         }
 
         // Show alert message
